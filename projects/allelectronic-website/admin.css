@@ -1,0 +1,28 @@
+body { font-family: Arial, sans-serif; background:#f7fafc; color:#111827; }
+.admin-panel { max-width:1000px; margin:40px auto; background:white; padding:24px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,0.08); }
+.admin-panel h1 { margin:0 0 12px 0; }
+.login { margin-bottom:20px }
+.admin-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.admin-header h2 { margin:0; }
+.logout-btn { background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
+.logout-btn:hover { background:#dc2626; }
+label { display:block; margin-bottom:8px }
+input { width:100%; padding:8px 10px; margin-top:6px; border:1px solid #e5e7eb; border-radius:6px }
+.btn { background:#667eea; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer }
+.hidden { display:none }
+.controls { display:flex; gap:8px; margin:12px 0 }
+#requestsTable { width:100%; border-collapse:collapse; margin-top:12px }
+#requestsTable th, #requestsTable td { padding:8px 10px; border-bottom:1px solid #eef2ff; text-align:left }
+.status { margin:12px 0; color:#374151 }
+.actionBtn { padding:6px 8px; border-radius:6px; border:1px solid #ddd; cursor:pointer; background:white }
+.select { padding:6px }
+.small { font-size:0.9rem }
+
+/* Save indicator styles */
+.save-indicator { display:inline-flex; align-items:center; gap:8px; margin-left:8px }
+.save-spinner { width:14px; height:14px; border:2px solid #cbd5e1; border-top-color:#667eea; border-radius:50%; animation: spin 1s linear infinite }
+.save-success { color: #16a34a; font-weight:600 }
+.save-error { color: #dc2626; font-weight:600 }
+.btn-saving { opacity:0.7; pointer-events:none }
+
+@keyframes spin { to { transform: rotate(360deg); } }

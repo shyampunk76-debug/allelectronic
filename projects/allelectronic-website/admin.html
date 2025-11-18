@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>All Electronic - Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="admin-panel">
+    <h1>Admin Console</h1>
+
+    <section class="login">
+      <h2>Sign in</h2>
+      <form id="adminLoginForm">
+        <label>Username<br><input id="adminUser" required></label>
+        <label>Password<br><input id="adminPass" type="password" required></label>
+        <div style="margin-top:10px">
+          <button class="btn" type="submit">Sign In</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="adminArea" class="hidden">
+      <div class="admin-header">
+        <h2>Repair Requests</h2>
+        <button id="btnLogout" class="logout-btn">🔓 Logout</button>
+      </div>
+
+      <div class="controls">
+        <input id="searchId" placeholder="Search by Submission ID (e.g. REP-12345)" />
+        <button id="btnSearch">Search</button>
+        <button id="btnRefresh">Refresh List</button>
+      </div>
+
+      <div id="statusMessage" class="status"></div>
+
+      <table id="requestsTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Product</th>
+            <th>Issue</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
