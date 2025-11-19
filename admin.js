@@ -299,10 +299,7 @@ function attachRowHandlers() {
     };
   });
   
-  // Attach checkbox change handlers
-  document.querySelectorAll('.row-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', updateDeleteButtonVisibility);
-  });
+  // Note: Individual row checkbox handlers are now managed via event delegation on the table body
   
   // Attach status change handlers to update row colors
   document.querySelectorAll('.statusSelect').forEach(select => {
@@ -369,60 +366,91 @@ window.addEventListener('load', () => {
 
 // Select all checkbox handler
 selectAllCheckbox.addEventListener('change', (e) => {
-  const checkboxes = document.querySelectorAll('.row-checkbox');
-  checkboxes.forEach(cb => cb.checked = e.target.checked);
-  updateDeleteButtonVisibility();
+  const isChecked = e.target.checked;
+  
+  // Use requestAnimationFrame for better performance
+  requestAnimationFrame(() => {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    
+    // Batch DOM updates
+    checkboxes.forEach(cb => cb.checked = isChecked);
+    
+    // Defer visibility update
+    requestAnimationFrame(() => {
+      updateDeleteButtonVisibility();
+    });
+  });
 });
 
-// Update delete button visibility based on selection
+// Update delete button visibility based on selection (debounced)
+let visibilityUpdateTimeout;
 function updateDeleteButtonVisibility() {
-  const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-  const deleteBtn = btnDeleteSelected;
-  
-  if (currentUserRole === 'admin' && selectedCheckboxes.length > 0) {
-    deleteBtn.style.display = 'inline-block';
-    deleteBtn.textContent = `🗑️ Delete Selected (${selectedCheckboxes.length})`;
-  } else {
-    deleteBtn.style.display = 'none';
-  }
+  // Debounce to prevent excessive updates
+  clearTimeout(visibilityUpdateTimeout);
+  visibilityUpdateTimeout = setTimeout(() => {
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const deleteBtn = btnDeleteSelected;
+    
+    if (currentUserRole === 'admin' && selectedCheckboxes.length > 0) {
+      deleteBtn.style.display = 'inline-block';
+      deleteBtn.textContent = `🗑️ Delete Selected (${selectedCheckboxes.length})`;
+    } else {
+      deleteBtn.style.display = 'none';
+    }
+  }, 50); // 50ms debounce
 }
 
 // Delete selected requests
-btnDeleteSelected.addEventListener('click', async () => {
-  const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-  const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+btnDeleteSelected.addEventListener('click', (e) => {
+  // Prevent default and stop propagation immediately
+  e.preventDefault();
+  e.stopPropagation();
   
-  if (selectedIds.length === 0) {
-    showStatus('No requests selected', true);
-    return;
-  }
-  
-  const confirmMsg = `Are you sure you want to delete ${selectedIds.length} request(s)?\n\nThis action cannot be undone!\n\nIDs to delete:\n${selectedIds.join(', ')}`;
-  
-  if (!confirm(confirmMsg)) {
-    return;
-  }
-  
-  showStatus(`Deleting ${selectedIds.length} request(s)...`);
-  btnDeleteSelected.disabled = true;
-  
-  try {
-    const res = await adminRequest('/api/admin/delete-requests', { ids: selectedIds });
+  // Defer heavy work to not block UI
+  requestAnimationFrame(async () => {
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
     
-    if (res && res.status === 'success') {
-      showStatus(`Successfully deleted ${res.deletedCount} request(s)`);
-      selectAllCheckbox.checked = false;
-      await loadRequests();
-    } else {
-      const msg = res && res.message ? res.message : 'Delete failed';
-      showStatus(msg, true);
+    if (selectedIds.length === 0) {
+      showStatus('No requests selected', true);
+      return;
     }
-  } catch (err) {
-    showStatus('Delete error: ' + err.message, true);
-  } finally {
-    btnDeleteSelected.disabled = false;
-    updateDeleteButtonVisibility();
-  }
+    
+    // Use shorter confirmation for better UX
+    const confirmMsg = `Delete ${selectedIds.length} request(s)?\n\nThis cannot be undone!`;
+    
+    if (!confirm(confirmMsg)) {
+      return;
+    }
+    
+    // Immediate UI feedback
+    btnDeleteSelected.disabled = true;
+    btnDeleteSelected.textContent = '🗑️ Deleting...';
+    showStatus(`Deleting ${selectedIds.length} request(s)...`);
+    
+    try {
+      const res = await adminRequest('/api/admin/delete-requests', { ids: selectedIds });
+      
+      if (res && res.status === 'success') {
+        showStatus(`✓ Deleted ${res.deletedCount} request(s)`);
+        selectAllCheckbox.checked = false;
+        
+        // Defer reload to not block UI
+        requestAnimationFrame(() => {
+          loadRequests();
+        });
+      } else {
+        const msg = res && res.message ? res.message : 'Delete failed';
+        showStatus(msg, true);
+        btnDeleteSelected.disabled = false;
+        updateDeleteButtonVisibility();
+      }
+    } catch (err) {
+      showStatus('Delete error: ' + err.message, true);
+      btnDeleteSelected.disabled = false;
+      updateDeleteButtonVisibility();
+    }
+  });
 });
 
 // Pagination button handlers
@@ -430,6 +458,13 @@ btnPrevPage.addEventListener('click', async () => {
   if (currentPage > 1) {
     currentPage--;
     await loadRequests();
+  }
+});
+
+// Event delegation for row checkboxes to avoid attaching individual handlers
+requestsTableBody.addEventListener('change', (e) => {
+  if (e.target.classList.contains('row-checkbox')) {
+    updateDeleteButtonVisibility();
   }
 });
 
@@ -514,30 +549,35 @@ function exportToExcel(data) {
     return;
   }
   
-  // Prepare data for Excel
-  const worksheet_data = [
-    ['Repair Requests Export', '', '', '', '', '', '', ''],
-    ['Generated on:', new Date().toLocaleString(), '', '', '', '', '', ''],
-    ['Total Records:', data.length, '', '', '', '', '', ''],
-    [],
-    ['ID', 'Name', 'Email', 'Phone', 'Product', 'Issue', 'Status', 'Payment']
-  ];
+  // Show immediate feedback
+  showStatus('Preparing Excel export...');
   
-  data.forEach(item => {
-    worksheet_data.push([
-      item.id,
-      item.name,
-      item.email,
-      item.phone,
-      item.product,
-      item.issue,
-      item.status,
-      item.payment
-    ]);
-  });
-  
-  // Create workbook and worksheet
-  const wb = XLSX.utils.book_new();
+  // Defer heavy Excel generation to not block UI
+  requestAnimationFrame(() => {
+    // Prepare data for Excel
+    const worksheet_data = [
+      ['Repair Requests Export', '', '', '', '', '', '', ''],
+      ['Generated on:', new Date().toLocaleString(), '', '', '', '', '', ''],
+      ['Total Records:', data.length, '', '', '', '', '', ''],
+      [],
+      ['ID', 'Name', 'Email', 'Phone', 'Product', 'Issue', 'Status', 'Payment']
+    ];
+    
+    data.forEach(item => {
+      worksheet_data.push([
+        item.id,
+        item.name,
+        item.email,
+        item.phone,
+        item.product,
+        item.issue,
+        item.status,
+        item.payment
+      ]);
+    });
+    
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(worksheet_data);
   
   // Set column widths
@@ -578,6 +618,7 @@ function exportToExcel(data) {
   
   showStatus(`Successfully exported ${data.length} record(s) to Excel`);
   exportMenu.classList.add('hidden');
+  }); // End requestAnimationFrame
 }
 
 // Export to PDF
@@ -587,8 +628,13 @@ function exportToPDF(data) {
     return;
   }
   
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
+  // Show immediate feedback
+  showStatus('Preparing PDF export...');
+  
+  // Defer heavy PDF generation to not block UI
+  requestAnimationFrame(() => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
   
   // Add title
   doc.setFontSize(18);
@@ -661,18 +707,25 @@ function exportToPDF(data) {
   
   showStatus(`Successfully exported ${data.length} record(s) to PDF`);
   exportMenu.classList.add('hidden');
+  }); // End requestAnimationFrame
 }
 
 // Handle export format selection
 document.querySelectorAll('.export-option').forEach(btn => {
   btn.addEventListener('click', (e) => {
-    const format = e.target.dataset.format;
-    const data = getSelectedRequestsData();
+    e.preventDefault();
+    e.stopPropagation();
     
-    if (format === 'xlsx') {
-      exportToExcel(data);
-    } else if (format === 'pdf') {
-      exportToPDF(data);
-    }
+    // Defer heavy work to not block UI
+    requestAnimationFrame(() => {
+      const format = e.target.dataset.format;
+      const data = getSelectedRequestsData();
+      
+      if (format === 'xlsx') {
+        exportToExcel(data);
+      } else if (format === 'pdf') {
+        exportToPDF(data);
+      }
+    });
   });
 });
