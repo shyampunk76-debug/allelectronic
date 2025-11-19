@@ -25,21 +25,15 @@ module.exports = async (req, res) => {
 
     console.log('Login attempt for user:', username);
 
-    // Try to find admin user in database
+    // Find admin user in database
     const adminUser = await AdminUser.findOne({ username, isActive: true });
 
     if (!adminUser) {
-      console.log('User not found in database, checking environment variables');
-      // Fallback to environment variables if database user not found
-      if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
-        const secret = process.env.JWT_SECRET || 'ae-admin-secret-change-this';
-        const token = jwt.sign({ username, role: 'admin' }, secret, { expiresIn: '8h' });
-        return res.status(200).json({ status: 'success', token });
-      }
+      console.log('User not found in database:', username);
       return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 
-    // Check password (plain text comparison - in production use bcrypt)
+    // Check password (plain text comparison)
     if (adminUser.password !== password) {
       console.log('Invalid password for user:', username);
       return res.status(401).json({ status: 'error', message: 'Invalid credentials' });

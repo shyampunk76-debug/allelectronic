@@ -10,16 +10,9 @@ const AdminUser = require('../models/AdminUser');
 // Admin users to create
 const adminUsers = [
   {
-    username: 'admin',
-    password: 'Admin@2025',
+    username: 'Admin',
+    password: 'Passw0rd',
     email: 'admin@allelectronic.com',
-    role: 'admin',
-    isActive: true
-  },
-  {
-    username: 'shyampunk76',
-    password: 'SecurePass123!',
-    email: 'shyampunk76@allelectronic.com',
     role: 'admin',
     isActive: true
   }
