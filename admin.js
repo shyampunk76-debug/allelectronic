@@ -70,11 +70,22 @@ function formatPhone(p) { if (!p) return ''; const s = p.replace(/(\d{1,3})(\d{3
 async function adminRequest(path, body) {
   try {
     const res = await fetch(`${API_BASE}${path}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      method: 'POST', 
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${authToken}` 
+      },
       body: JSON.stringify(body)
     });
-    return res.json();
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({ message: `HTTP ${res.status}` }));
+      return { status: 'error', message: errorData.message || `Request failed with status ${res.status}` };
+    }
+    
+    return await res.json();
   } catch (err) {
+    console.error('Admin request error:', err);
     return { status: 'error', message: err.message };
   }
 }
@@ -159,6 +170,8 @@ function attachRowHandlers() {
       const paymentEl = document.querySelector(`.paymentSelect[data-id="${id}"]`);
       const payload = { id, status: statusEl.value, payment: paymentEl.value };
 
+      console.log('Saving request:', payload);
+
       // Per-row indicator elements
       let indicator = btn.parentElement.querySelector('.save-indicator');
       if (!indicator) {
@@ -173,16 +186,21 @@ function attachRowHandlers() {
 
       try {
         const res = await adminRequest('/api/admin/update-status', payload);
+        console.log('Save response:', res);
+        
         if (res && res.status === 'success') {
           indicator.innerHTML = '<span class="save-success">Saved ✓</span>';
+          showStatus('Changes saved successfully');
         } else {
           const msg = res && res.message ? res.message : 'Error saving';
           indicator.innerHTML = `<span class="save-error">Error ✕</span>`;
           showStatus(msg, true);
+          console.error('Save failed:', res);
         }
       } catch (err) {
         indicator.innerHTML = `<span class="save-error">Error ✕</span>`;
         showStatus('Save error: ' + err.message, true);
+        console.error('Save exception:', err);
       } finally {
         btn.classList.remove('btn-saving');
         // Clear the indicator after 3 seconds on success, longer on error
