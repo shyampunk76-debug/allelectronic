@@ -7,17 +7,26 @@ module.exports = async (req, res) => {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { username, password } = req.body || {};
-  if (!username || !password || username !== process.env.ADMIN_USER || password !== process.env.ADMIN_PASS) {
-    return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ status: 'error', message: 'Method not allowed' });
   }
 
   try {
+    const { username, password } = req.body || {};
+    
+    if (!username || !password) {
+      return res.status(400).json({ status: 'error', message: 'Username and password required' });
+    }
+
+    if (username !== process.env.ADMIN_USER || password !== process.env.ADMIN_PASS) {
+      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+    }
+
     const secret = process.env.JWT_SECRET || 'ae-admin-secret-change-this';
     const token = jwt.sign({ username, role: 'admin' }, secret, { expiresIn: '8h' });
-    return res.json({ status: 'success', token });
+    return res.status(200).json({ status: 'success', token });
   } catch (err) {
     console.error('admin/login error:', err);
-    res.status(500).json({ status: 'error', message: 'Server error' });
+    return res.status(500).json({ status: 'error', message: 'Server error' });
   }
 };
