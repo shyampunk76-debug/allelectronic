@@ -20,10 +20,6 @@ module.exports = async (req, res) => {
 
   // Verify JWT token and ensure DB connection
   try {
-    // Attempt DB connection before processing update
-    await connectDB();
-    console.log('update-status: DB connection state:', mongoose.connection.readyState);
-
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
     if (!token) throw new Error('Missing token');
@@ -34,6 +30,14 @@ module.exports = async (req, res) => {
   } catch (err) {
     console.error('update-status auth error:', err);
     return res.status(401).json({ status: 'error', message: 'Unauthorized: ' + err.message });
+  }
+
+  // Attempt DB connection before processing update
+  try {
+    await connectDB();
+    console.log('update-status: DB connection state:', mongoose.connection.readyState);
+  } catch (e) {
+    console.error('update-status: DB connection error:', e);
   }
 
   const { id, status, payment } = req.body || {};
