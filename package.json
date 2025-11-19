@@ -1,0 +1,24 @@
+{
+  "name": "allelectronic-website",
+  "version": "1.0.0",
+  "description": "All Electronic - Home Appliance & Electronics Repair Services Website",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
+  "keywords": [
+    "repair",
+    "appliance",
+    "electronics",
+    "service"
+  ],
+  "author": "All Electronic",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.5.0"
+  }
+}
