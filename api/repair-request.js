@@ -18,6 +18,13 @@ module.exports = async (req, res) => {
   // Ensure DB connection is attempted before handling request
   try {
     await connectDB();
+    
+    // Wait for connection to be ready
+    let retries = 0;
+    while (mongoose.connection.readyState !== 1 && retries < 10) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      retries++;
+    }
   } catch (e) {
     // connectDB logs errors; continue and handler will use fallback if needed
   }
@@ -48,7 +55,7 @@ module.exports = async (req, res) => {
     }
 
     const repairRequest = {
-      id: `REP-${Date.now()}`,
+      id: `REP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: name.trim(),
       email: email.trim(),
       phone: phone.replace(/\D/g, ''),
@@ -68,6 +75,20 @@ module.exports = async (req, res) => {
         return res.status(201).json({ status: 'success', message: 'Repair request saved', submissionId: saved.id || saved._id });
       } catch (saveErr) {
         console.error('repair-request: DB save error:', saveErr && saveErr.message ? saveErr.message : saveErr);
+        
+        // Check if it's a duplicate key error
+        if (saveErr.code === 11000) {
+          console.error('Duplicate key error - retrying with new ID');
+          // Generate new ID and retry once
+          repairRequest.id = `REP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          try {
+            const saved = await RepairRequestModel.create(repairRequest);
+            console.log('repair-request: saved to DB on retry id=', saved.id || saved._id);
+            return res.status(201).json({ status: 'success', message: 'Repair request saved', submissionId: saved.id || saved._id });
+          } catch (retryErr) {
+            console.error('repair-request: Retry failed:', retryErr.message);
+          }
+        }
         // fallthrough to return non-DB success so frontend still receives confirmation
       }
     }
