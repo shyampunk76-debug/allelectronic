@@ -128,6 +128,14 @@ adminLoginForm.addEventListener('submit', async (e) => {
       document.querySelector('.login').style.display = 'none';
       adminArea.classList.remove('hidden');
       
+      // Display user role info
+      const roleInfo = document.getElementById('userRoleInfo');
+      const roleDisplay = currentUserRole === 'admin' ? '👑 Administrator' : '👤 Staff User';
+      const permissions = currentUserRole === 'admin' 
+        ? 'Full access: View, Edit, Delete, Export'
+        : 'Limited access: View, Edit, Export only';
+      roleInfo.innerHTML = `<strong>${roleDisplay}</strong> • ${permissions}`;
+      
       // Show/hide delete button based on role
       if (currentUserRole === 'admin') {
         btnDeleteSelected.classList.remove('hidden');

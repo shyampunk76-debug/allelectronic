@@ -15,6 +15,13 @@ const adminUsers = [
     email: 'admin@allelectronic.com',
     role: 'admin',
     isActive: true
+  },
+  {
+    username: 'user',
+    password: 'user@123',
+    email: 'user@allelectronic.com',
+    role: 'user',
+    isActive: true
   }
 ];
 
