@@ -119,11 +119,12 @@ adminLoginForm.addEventListener('submit', async (e) => {
       body: JSON.stringify({ username: user, password: pass })
     });
     const data = await res.json();
-    if (data.status === 'success') {
+    if (data.status === 'success' && data.user && data.user.role) {
       authToken = data.token;
-      currentUserRole = data.user && data.user.role ? data.user.role : 'admin';
+      currentUserRole = data.user.role;
       sessionStorage.setItem('admin_token', authToken);
       sessionStorage.setItem('admin_role', currentUserRole);
+      console.log('Login successful - Role:', currentUserRole);
       showStatus('Signed in');
       document.querySelector('.login').style.display = 'none';
       adminArea.classList.remove('hidden');
@@ -144,6 +145,9 @@ adminLoginForm.addEventListener('submit', async (e) => {
       }
       
       await loadRequests();
+    } else if (data.status === 'success' && (!data.user || !data.user.role)) {
+      showStatus('Login error: User role missing from server response', true);
+      console.error('Server response missing user role:', data);
     } else {
       showStatus(data.message || 'Sign in failed', true);
     }
@@ -335,13 +339,57 @@ function findById(id) {
   };
 }
 
+// Decode JWT token to verify role (basic client-side check)
+function decodeJWT(token) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1]));
+    return payload;
+  } catch (err) {
+    console.error('JWT decode error:', err);
+    return null;
+  }
+}
+
+// Verify stored role matches JWT token role
+function verifyStoredRole() {
+  const stored = sessionStorage.getItem('admin_token');
+  const storedRole = sessionStorage.getItem('admin_role');
+  
+  if (!stored || !storedRole) return false;
+  
+  const decoded = decodeJWT(stored);
+  if (!decoded || !decoded.role) {
+    console.error('Invalid token - missing role in JWT');
+    return false;
+  }
+  
+  // Check if stored role matches JWT role
+  if (decoded.role !== storedRole) {
+    console.error('Role mismatch! JWT role:', decoded.role, 'Stored role:', storedRole);
+    return false;
+  }
+  
+  // Check if token is expired
+  if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+    console.error('Token expired');
+    return false;
+  }
+  
+  return true;
+}
+
 // Load stored token on page load
 window.addEventListener('load', () => {
   const stored = sessionStorage.getItem('admin_token');
   const storedRole = sessionStorage.getItem('admin_role');
-  if (stored) {
+  
+  // Verify token and role integrity
+  if (stored && storedRole && verifyStoredRole()) {
     authToken = stored;
-    currentUserRole = storedRole || 'admin';
+    currentUserRole = storedRole;
+    console.log('Session restored - Role:', currentUserRole);
     document.querySelector('.login').style.display = 'none';
     adminArea.classList.remove('hidden');
     
@@ -361,8 +409,38 @@ window.addEventListener('load', () => {
     }
     
     loadRequests();
+  } else if (stored) {
+    // If token exists but verification failed, clear everything and force re-login
+    console.warn('Token verification failed - forcing re-login for security');
+    sessionStorage.removeItem('admin_token');
+    sessionStorage.removeItem('admin_role');
+    authToken = null;
+    currentUserRole = null;
+    showStatus('Session expired or invalid - please login again', true);
   }
 });
+
+// Periodic integrity check to prevent role tampering during session
+setInterval(() => {
+  if (authToken && currentUserRole) {
+    const storedRole = sessionStorage.getItem('admin_role');
+    
+    // Verify stored role hasn't been tampered with
+    if (storedRole !== currentUserRole) {
+      console.error('Security alert: Role tampering detected!');
+      logout();
+      showStatus('Security violation detected - please login again', true);
+      return;
+    }
+    
+    // Verify token still matches stored role
+    if (!verifyStoredRole()) {
+      console.error('Security alert: Token/role mismatch detected!');
+      logout();
+      showStatus('Session integrity check failed - please login again', true);
+    }
+  }
+}, 30000); // Check every 30 seconds
 
 // Select all checkbox handler
 selectAllCheckbox.addEventListener('change', (e) => {
