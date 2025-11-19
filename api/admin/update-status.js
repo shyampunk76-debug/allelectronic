@@ -21,13 +21,8 @@ module.exports = async (req, res) => {
   // Verify JWT token and ensure DB connection
   try {
     // Attempt DB connection before processing update
-    const db = await connectDB();
+    await connectDB();
     console.log('update-status: DB connection state:', mongoose.connection.readyState);
-
-    if (!db || (mongoose.connection && mongoose.connection.readyState !== 1)) {
-      console.error('update-status: DB not available');
-      return res.status(500).json({ status: 'error', message: 'Database not configured or unavailable. Set MONGODB_URI in environment.' });
-    }
 
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
@@ -47,6 +42,12 @@ module.exports = async (req, res) => {
   if (!id) return res.status(400).json({ status: 'error', message: 'Missing id' });
 
   try {
+    // Check if database is connected
+    if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+      console.error('update-status: DB not connected');
+      return res.status(500).json({ status: 'error', message: 'Database not available' });
+    }
+
     const update = {};
     if (status && validStatus.includes(status)) update.status = status;
     if (payment && validPayment.includes(payment)) update.payment = payment;
