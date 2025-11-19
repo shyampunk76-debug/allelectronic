@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { name, email, phone, product, issue, serviceType } = req.body || {};
+    const { name, email, phone, product, issue, serviceType, forceDuplicate } = req.body || {};
 
     const errors = {};
     if (!name || name.trim().length < 2) errors.name = 'Name required (2+ chars)';
@@ -52,6 +52,45 @@ module.exports = async (req, res) => {
 
     if (Object.keys(errors).length > 0) {
       return res.status(400).json({ status: 'error', message: 'Validation failed', errors });
+    }
+
+    // Check for duplicate submission in database (unless forceDuplicate is true)
+    if (!forceDuplicate) {
+      console.log('repair-request: Checking for duplicates...');
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        try {
+          // Check if same product, email/phone combination exists with pending or in-progress status
+          const cleanedPhone = phone.replace(/\D/g, '');
+          const cleanedProduct = product.trim().toLowerCase();
+          
+          const existingRequest = await RepairRequestModel.findOne({
+            $or: [
+              { email: email.trim(), product: { $regex: new RegExp(`^${cleanedProduct}$`, 'i') } },
+              { phone: cleanedPhone, product: { $regex: new RegExp(`^${cleanedProduct}$`, 'i') } }
+            ],
+            status: { $in: ['pending', 'in-progress'] }
+          }).lean();
+
+          if (existingRequest) {
+            console.log('repair-request: Duplicate found:', existingRequest.id);
+            return res.status(409).json({ 
+              status: 'duplicate', 
+              message: 'Duplicate repair request detected',
+              duplicate: {
+                id: existingRequest.id,
+                product: existingRequest.product,
+                status: existingRequest.status,
+                createdAt: existingRequest.createdAt
+              }
+            });
+          }
+        } catch (dupCheckErr) {
+          console.error('repair-request: Duplicate check error:', dupCheckErr.message);
+          // Continue with submission if duplicate check fails
+        }
+      }
+    } else {
+      console.log('repair-request: Skipping duplicate check (forceDuplicate=true)');
     }
 
     const repairRequest = {

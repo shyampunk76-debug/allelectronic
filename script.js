@@ -15,7 +15,7 @@ console.log('🔧 API Configuration:', {
 // MODAL DIALOG SYSTEM
 // ========================================
 
-function showDuplicateConfirmDialog(product, onAllow, onCancel) {
+function showDuplicateConfirmDialog(product, duplicateInfo, onAllow, onCancel) {
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.style.cssText = `
@@ -43,6 +43,8 @@ function showDuplicateConfirmDialog(product, onAllow, onCancel) {
         animation: slideIn 0.3s ease-out;
     `;
 
+    const submittedDate = duplicateInfo.createdAt ? new Date(duplicateInfo.createdAt).toLocaleDateString() : 'recently';
+
     modal.innerHTML = `
         <div style="margin-bottom: 20px;">
             <h2 style="color: #1a1a2e; margin: 0 0 15px 0; font-size: 1.5rem;">
@@ -62,37 +64,40 @@ function showDuplicateConfirmDialog(product, onAllow, onCancel) {
             ">
                 📦 ${escapeHtml(product)}
             </p>
+            <p style="color: #666; line-height: 1.6; margin: 0 0 10px 0;">
+                <strong>Request ID:</strong> ${escapeHtml(duplicateInfo.id)}<br>
+                <strong>Status:</strong> ${escapeHtml(duplicateInfo.status)}<br>
+                <strong>Submitted:</strong> ${submittedDate}
+            </p>
             <p style="color: #666; line-height: 1.6; margin: 0;">
-                Is this the same product that is broken again, or did you accidentally submit the same request twice?
+                Is this a new problem with the same product, or did you accidentally submit the same request twice?
             </p>
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
             <button id="cancelBtn" style="
                 padding: 10px 20px;
-                border: 2px solid #ddd;
-                background: white;
-                color: #1a1a2e;
-                border-radius: 5px;
-                cursor: pointer;
-                font-weight: 600;
-                transition: all 0.3s;
-            " onmouseover="this.style.background='#f5f5f5'; this.style.borderColor='#999';"
-               onmouseout="this.style.background='white'; this.style.borderColor='#ddd';">
-                ❌ Same Request (Don't Submit)
-            </button>
-            <button id="allowBtn" style="
-                padding: 10px 20px;
+                background: #e5e7eb;
+                color: #374151;
                 border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+            ">
+                Cancel - Same Request
+            </button>
+            <button id="continueBtn" style="
+                padding: 10px 20px;
                 background: #667eea;
                 color: white;
-                border-radius: 5px;
+                border: none;
+                border-radius: 6px;
                 cursor: pointer;
+                font-size: 14px;
                 font-weight: 600;
-                transition: all 0.3s;
-            " onmouseover="this.style.background='#764ba2';"
-               onmouseout="this.style.background='#667eea';">
-                ✅ New Problem (Submit Again)
+            ">
+                Continue - New Problem
             </button>
         </div>
     `;
@@ -100,40 +105,27 @@ function showDuplicateConfirmDialog(product, onAllow, onCancel) {
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-    // Add animation style
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Handle buttons
-    document.getElementById('allowBtn').addEventListener('click', () => {
+    // Add button handlers
+    document.getElementById('continueBtn').onclick = () => {
         overlay.remove();
         onAllow();
-    });
+        document.removeEventListener('keydown', escapeHandler);
+    };
 
-    document.getElementById('cancelBtn').addEventListener('click', () => {
+    document.getElementById('cancelBtn').onclick = () => {
         overlay.remove();
         onCancel();
-    });
+        document.removeEventListener('keydown', escapeHandler);
+    };
 
     // Close on overlay click
-    overlay.addEventListener('click', (e) => {
+    overlay.onclick = (e) => {
         if (e.target === overlay) {
             overlay.remove();
             onCancel();
+            document.removeEventListener('keydown', escapeHandler);
         }
-    });
+    };
 
     // Close on Escape key
     const escapeHandler = (e) => {
@@ -155,7 +147,7 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
 // Form validation and submission
@@ -261,7 +253,7 @@ repairForm.addEventListener('submit', async function(e) {
 });
 
 // Proceed with form submission
-async function proceedWithSubmission(formData) {
+async function proceedWithSubmission(formData, forceDuplicate = false) {
     const formMessage = document.getElementById('formMessage');
     const submitButton = repairForm.querySelector('.btn-submit');
     const originalButtonText = submitButton.textContent;
@@ -271,7 +263,32 @@ async function proceedWithSubmission(formData) {
 
     try {
         // Submit form to server
-        const response = await submitFormData(formData);
+        const response = await submitFormData(formData, forceDuplicate);
+
+        // Handle duplicate detection
+        if (response.isDuplicate) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+            
+            // Show duplicate confirmation dialog
+            showDuplicateConfirmDialog(
+                response.duplicate,
+                () => {
+                    // User chose to submit anyway (new problem)
+                    proceedWithSubmission(formData, true);
+                },
+                () => {
+                    // User canceled submission
+                    formMessage.classList.add('error');
+                    formMessage.textContent = '✓ Submission canceled - duplicate request not submitted.';
+                    setTimeout(() => {
+                        formMessage.classList.remove('error');
+                        formMessage.textContent = '';
+                    }, 3000);
+                }
+            );
+            return;
+        }
 
         // Show success message
         formMessage.classList.add('success');
@@ -300,11 +317,14 @@ async function proceedWithSubmission(formData) {
 }
 
 // Submit form data to server with better error handling
-async function submitFormData(formData) {
+async function submitFormData(formData, forceDuplicate = false) {
     const endpoint = `${API_CONFIG.baseURL}/api/repair-request`;
     
     console.log('📤 Submitting to:', endpoint);
     console.log('📝 Form data:', formData);
+
+    // Add forceDuplicate flag if provided
+    const submitData = forceDuplicate ? { ...formData, forceDuplicate: true } : formData;
 
     // Use AbortController to add a client-side timeout so the UI doesn't hang indefinitely
     const controller = new AbortController();
@@ -318,7 +338,7 @@ async function submitFormData(formData) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(submitData),
             signal: controller.signal
         });
         clearTimeout(timeout);
@@ -338,6 +358,12 @@ async function submitFormData(formData) {
             console.error('❌ Failed to parse JSON response:', parseError);
             console.error('Response text:', response.statusText);
             throw new Error(`Server error (${response.status}): ${response.statusText}`);
+        }
+
+        // Handle duplicate detection (409 Conflict)
+        if (response.status === 409) {
+            console.log('⚠️ Duplicate detected:', data.duplicate);
+            return { isDuplicate: true, duplicate: data.duplicate };
         }
 
         if (!response.ok) {
