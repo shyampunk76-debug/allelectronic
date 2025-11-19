@@ -77,4 +77,18 @@ input { width:100%; padding:8px 10px; margin-top:6px; border:1px solid #e5e7eb; 
 .pagination-btn:disabled { opacity:0.5; cursor:not-allowed; }
 .pagination-btn.active { background:#667eea; color:white; border-color:#667eea; font-weight:600; }
 
+/* Status-based row colors */
+tr[data-status="pending"] { background-color: #fee2e2; } /* Light red */
+tr[data-status="in-progress"] { background-color: #fef3c7; } /* Light yellow */
+tr[data-status="completed"] { background-color: #d1fae5; } /* Light green */
+tr[data-status="cancelled"] { background-color: #ffffff; } /* White */
+
+/* Payment-based row colors (alternative if needed) */
+tr[data-payment="payment-pending"] { background-color: #fee2e2; } /* Light red */
+tr[data-payment="processing"] { background-color: #fef3c7; } /* Light yellow */
+tr[data-payment="paid"] { background-color: #d1fae5; } /* Light green */
+
+/* Ensure text remains readable on colored backgrounds */
+tr[data-status] td, tr[data-payment] td { color: #111827; }
+
 @keyframes spin { to { transform: rotate(360deg); } }

@@ -46,6 +46,8 @@ function clearTable() { requestsTableBody.innerHTML = ''; }
 function renderRow(r, index) {
   const tr = document.createElement('tr');
   tr.dataset.id = r.id;
+  tr.dataset.status = r.status || 'pending';
+  tr.dataset.payment = r.payment || 'payment-pending';
   tr.innerHTML = `
     <td><input type="checkbox" class="row-checkbox" data-id="${r.id}"></td>
     <td class="serial-num">${index}</td>
@@ -260,6 +262,28 @@ function attachRowHandlers() {
   // Attach checkbox change handlers
   document.querySelectorAll('.row-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', updateDeleteButtonVisibility);
+  });
+  
+  // Attach status change handlers to update row colors
+  document.querySelectorAll('.statusSelect').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const id = e.target.dataset.id;
+      const row = requestsTableBody.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        row.dataset.status = e.target.value;
+      }
+    });
+  });
+  
+  // Attach payment change handlers to update row colors
+  document.querySelectorAll('.paymentSelect').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const id = e.target.dataset.id;
+      const row = requestsTableBody.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        row.dataset.payment = e.target.value;
+      }
+    });
   });
 }
 
