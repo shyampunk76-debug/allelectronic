@@ -31,6 +31,16 @@
         <input id="searchId" placeholder="Search by Submission ID (e.g. REP-12345)" />
         <button id="btnSearch">Search</button>
         <button id="btnRefresh">Refresh List</button>
+        <div class="items-per-page">
+          <label for="itemsPerPage">Show:</label>
+          <select id="itemsPerPage">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
       </div>
 
       <div id="statusMessage" class="status"></div>

@@ -10,7 +10,11 @@ label { display:block; margin-bottom:8px }
 input { width:100%; padding:8px 10px; margin-top:6px; border:1px solid #e5e7eb; border-radius:6px }
 .btn { background:#667eea; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer }
 .hidden { display:none }
-.controls { display:flex; gap:8px; margin:12px 0 }
+.controls { display:flex; gap:8px; margin:12px 0; align-items:center; flex-wrap:wrap }
+.items-per-page { display:flex; align-items:center; gap:8px; margin-left:auto }
+.items-per-page label { margin:0; font-size:14px; font-weight:500 }
+.items-per-page select { padding:8px 12px; border:1px solid #e5e7eb; border-radius:6px; background:white; cursor:pointer; font-size:14px }
+.items-per-page select:hover { border-color:#667eea }
 #requestsTable { width:100%; border-collapse:collapse; margin-top:12px }
 #requestsTable th, #requestsTable td { padding:8px 10px; border-bottom:1px solid #eef2ff; text-align:left }
 .status { margin:12px 0; color:#374151 }

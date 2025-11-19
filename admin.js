@@ -10,6 +10,7 @@ const searchId = document.getElementById('searchId');
 
 const API_BASE = window.location.origin;
 let authToken = null;
+let itemsPerPage = 50;
 
 function showStatus(msg, isError = false) {
   statusMessage.textContent = msg;
@@ -108,6 +109,14 @@ adminLoginForm.addEventListener('submit', async (e) => {
 
 btnRefresh.addEventListener('click', loadRequests);
 btnLogout.addEventListener('click', logout);
+
+// Items per page dropdown handler
+const itemsPerPageSelect = document.getElementById('itemsPerPage');
+itemsPerPageSelect.addEventListener('change', async (e) => {
+  const value = e.target.value;
+  itemsPerPage = value === 'all' ? 999999 : parseInt(value);
+  await loadRequests();
+});
 btnSearch.addEventListener('click', async () => {
   const search = searchId.value.trim();
   if (!search) return showStatus('Enter text to search', true);
@@ -125,7 +134,7 @@ btnSearch.addEventListener('click', async () => {
 
 async function loadRequests() {
   showStatus('Loading...');
-  const result = await adminRequest('/api/admin/requests', { page: 1, limit: 50 });
+  const result = await adminRequest('/api/admin/requests', { page: 1, limit: itemsPerPage });
   if (result.status === 'success') {
     clearTable();
     (result.data || []).forEach(r => requestsTableBody.appendChild(renderRow(r)));
