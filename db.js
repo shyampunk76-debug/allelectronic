@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+  const uri = process.env.MONGODB_URI_NEW || process.env.MONGODB_URI || process.env.MONGO_URI;
 
   if (!uri) {
     console.log('No MONGODB_URI provided. Running without database (in-memory fallback).');

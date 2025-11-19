@@ -28,9 +28,9 @@ const adminUsers = [
 async function createAdminUsers() {
   try {
     // Connect to MongoDB
-    const uri = process.env.MONGODB_URI;
+    const uri = process.env.MONGODB_URI_NEW || process.env.MONGODB_URI;
     if (!uri) {
-      console.error('❌ MONGODB_URI not found in environment variables');
+      console.error('❌ MONGODB_URI_NEW or MONGODB_URI not found in environment variables');
       process.exit(1);
     }
 

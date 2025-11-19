@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 async function checkCollections() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI_NEW || process.env.MONGODB_URI);
     console.log('Connected to database:', mongoose.connection.name);
     
     const collections = await mongoose.connection.db.listCollections().toArray();
