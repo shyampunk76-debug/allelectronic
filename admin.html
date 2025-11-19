@@ -46,24 +46,36 @@
 
       <div id="statusMessage" class="status"></div>
 
-      <table id="requestsTable">
-        <thead>
-          <tr>
-            <th><input type="checkbox" id="selectAll" title="Select all"></th>
-            <th>#</th>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Product</th>
-            <th>Issue</th>
-            <th>Status</th>
-            <th>Payment</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="table-container">
+        <table id="requestsTable">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll" title="Select all"></th>
+              <th>#</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Product</th>
+              <th>Issue</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="pagination hidden" id="pagination">
+        <div class="pagination-buttons">
+          <button class="pagination-btn" id="btnPrevPage">← Previous</button>
+        </div>
+        <div class="pagination-info" id="paginationInfo">Page 1 of 1</div>
+        <div class="pagination-buttons">
+          <button class="pagination-btn" id="btnNextPage">Next →</button>
+        </div>
+      </div>
     </section>
   </main>
 

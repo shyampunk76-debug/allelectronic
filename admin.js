@@ -9,11 +9,18 @@ const btnLogout = document.getElementById('btnLogout');
 const btnDeleteSelected = document.getElementById('btnDeleteSelected');
 const selectAllCheckbox = document.getElementById('selectAll');
 const searchId = document.getElementById('searchId');
+const paginationDiv = document.getElementById('pagination');
+const paginationInfo = document.getElementById('paginationInfo');
+const btnPrevPage = document.getElementById('btnPrevPage');
+const btnNextPage = document.getElementById('btnNextPage');
 
 const API_BASE = window.location.origin;
 let authToken = null;
 let itemsPerPage = 50;
 let currentUserRole = null; // Store user role from login
+let currentPage = 1;
+let totalPages = 1;
+let totalRecords = 0;
 
 function showStatus(msg, isError = false) {
   statusMessage.textContent = msg;
@@ -143,6 +150,7 @@ const itemsPerPageSelect = document.getElementById('itemsPerPage');
 itemsPerPageSelect.addEventListener('change', async (e) => {
   const value = e.target.value;
   itemsPerPage = value === 'all' ? 999999 : parseInt(value);
+  currentPage = 1; // Reset to page 1 when changing items per page
   await loadRequests();
 });
 btnSearch.addEventListener('click', async () => {
@@ -162,16 +170,38 @@ btnSearch.addEventListener('click', async () => {
 
 async function loadRequests() {
   showStatus('Loading...');
-  const result = await adminRequest('/api/admin/requests', { page: 1, limit: itemsPerPage });
+  const result = await adminRequest('/api/admin/requests', { page: currentPage, limit: itemsPerPage });
   if (result.status === 'success') {
     clearTable();
-    (result.data || []).forEach((r, index) => requestsTableBody.appendChild(renderRow(r, index + 1)));
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    (result.data || []).forEach((r, index) => requestsTableBody.appendChild(renderRow(r, startIndex + index + 1)));
     attachRowHandlers();
+    
+    // Update pagination info
+    if (result.pagination) {
+      totalRecords = result.pagination.total;
+      totalPages = result.pagination.pages;
+      updatePaginationUI();
+    }
+    
     const pagInfo = result.pagination ? ` (${result.pagination.total} total)` : '';
     showStatus(`Loaded ${result.data.length} requests${pagInfo}`);
   } else {
     showStatus(result.message || 'Failed to load', true);
   }
+}
+
+function updatePaginationUI() {
+  if (totalPages <= 1 && itemsPerPage >= 999999) {
+    paginationDiv.classList.add('hidden');
+    return;
+  }
+  
+  paginationDiv.classList.remove('hidden');
+  paginationInfo.textContent = `Page ${currentPage} of ${totalPages} (${totalRecords} total)`;
+  
+  btnPrevPage.disabled = currentPage <= 1;
+  btnNextPage.disabled = currentPage >= totalPages;
 }
 
 function attachRowHandlers() {
@@ -320,5 +350,20 @@ btnDeleteSelected.addEventListener('click', async () => {
   } finally {
     btnDeleteSelected.disabled = false;
     updateDeleteButtonVisibility();
+  }
+});
+
+// Pagination button handlers
+btnPrevPage.addEventListener('click', async () => {
+  if (currentPage > 1) {
+    currentPage--;
+    await loadRequests();
+  }
+});
+
+btnNextPage.addEventListener('click', async () => {
+  if (currentPage < totalPages) {
+    currentPage++;
+    await loadRequests();
   }
 });
