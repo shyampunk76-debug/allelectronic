@@ -42,17 +42,5 @@ adminUserSchema.pre('save', function(next) {
   next();
 });
 
-// Export model with duplicate key error handling
-let AdminUser;
-
-try {
-  AdminUser = mongoose.model('AdminUser');
-} catch (err) {
-  if (err.name === 'OverwriteModelError') {
-    AdminUser = mongoose.model('AdminUser');
-  } else {
-    AdminUser = mongoose.model('AdminUser', adminUserSchema);
-  }
-}
-
-module.exports = AdminUser;
+// Export model - ensure it's in the 'adminusers' collection
+module.exports = mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema);

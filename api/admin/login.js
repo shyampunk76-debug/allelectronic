@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const connectDB = require('../../db');
+const AdminUser = require('../../models/AdminUser');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,34 +14,58 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Connect to database
+    await connectDB();
+
     const { username, password } = req.body || {};
     
     if (!username || !password) {
       return res.status(400).json({ status: 'error', message: 'Username and password required' });
     }
 
-    // Debug logging (remove after testing)
-    console.log('Login attempt:', { username, hasPassword: !!password });
-    console.log('Expected user:', process.env.ADMIN_USER);
-    console.log('Env vars present:', { 
-      hasAdminUser: !!process.env.ADMIN_USER, 
-      hasAdminPass: !!process.env.ADMIN_PASS,
-      hasJwtSecret: !!process.env.JWT_SECRET
-    });
+    console.log('Login attempt for user:', username);
 
-    if (username !== process.env.ADMIN_USER || password !== process.env.ADMIN_PASS) {
-      return res.status(401).json({ 
-        status: 'error', 
-        message: 'Invalid credentials',
-        debug: `Expected user: ${process.env.ADMIN_USER ? 'set' : 'NOT SET'}`
-      });
+    // Try to find admin user in database
+    const adminUser = await AdminUser.findOne({ username, isActive: true });
+
+    if (!adminUser) {
+      console.log('User not found in database, checking environment variables');
+      // Fallback to environment variables if database user not found
+      if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
+        const secret = process.env.JWT_SECRET || 'ae-admin-secret-change-this';
+        const token = jwt.sign({ username, role: 'admin' }, secret, { expiresIn: '8h' });
+        return res.status(200).json({ status: 'success', token });
+      }
+      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 
+    // Check password (plain text comparison - in production use bcrypt)
+    if (adminUser.password !== password) {
+      console.log('Invalid password for user:', username);
+      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+    }
+
+    console.log('Login successful for user:', username);
+
+    // Generate JWT token
     const secret = process.env.JWT_SECRET || 'ae-admin-secret-change-this';
-    const token = jwt.sign({ username, role: 'admin' }, secret, { expiresIn: '8h' });
-    return res.status(200).json({ status: 'success', token });
+    const token = jwt.sign({ 
+      username: adminUser.username, 
+      role: adminUser.role,
+      email: adminUser.email 
+    }, secret, { expiresIn: '8h' });
+
+    return res.status(200).json({ 
+      status: 'success', 
+      token,
+      user: {
+        username: adminUser.username,
+        email: adminUser.email,
+        role: adminUser.role
+      }
+    });
   } catch (err) {
     console.error('admin/login error:', err);
-    return res.status(500).json({ status: 'error', message: 'Server error' });
+    return res.status(500).json({ status: 'error', message: 'Server error: ' + err.message });
   }
 };
