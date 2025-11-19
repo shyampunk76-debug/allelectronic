@@ -12,65 +12,6 @@ console.log('🔧 API Configuration:', {
 });
 
 // ========================================
-// DUPLICATE DETECTION SYSTEM
-// ========================================
-
-class DuplicateDetector {
-    constructor() {
-        this.storageKey = 'repairSubmissionHistory';
-        this.loadHistory();
-    }
-
-    loadHistory() {
-        try {
-            const stored = localStorage.getItem(this.storageKey);
-            this.history = stored ? JSON.parse(stored) : [];
-        } catch (e) {
-            this.history = [];
-        }
-    }
-
-    saveHistory() {
-        try {
-            localStorage.setItem(this.storageKey, JSON.stringify(this.history));
-        } catch (e) {
-            console.warn('Could not save history:', e);
-        }
-    }
-
-    // Check if product was submitted before by same email/phone
-    checkDuplicate(formData) {
-        const { product, email, phone } = formData;
-        
-        const duplicates = this.history.filter(entry => {
-            // Match by product AND (email OR phone)
-            const sameProduct = entry.product.toLowerCase().trim() === product.toLowerCase().trim();
-            const sameContact = entry.email === email || entry.phone === phone;
-            return sameProduct && sameContact;
-        });
-
-        return duplicates.length > 0 ? duplicates : null;
-    }
-
-    // Add new submission to history
-    addToHistory(formData, submissionId) {
-        this.history.push({
-            ...formData,
-            submissionId,
-            submittedAt: new Date().toISOString()
-        });
-        this.saveHistory();
-    }
-
-    // Get all submissions for a customer
-    getCustomerSubmissions(email) {
-        return this.history.filter(entry => entry.email === email);
-    }
-}
-
-const duplicateDetector = new DuplicateDetector();
-
-// ========================================
 // MODAL DIALOG SYSTEM
 // ========================================
 
@@ -315,31 +256,7 @@ repairForm.addEventListener('submit', async function(e) {
         return;
     }
 
-    // Check for duplicates
-    const duplicates = duplicateDetector.checkDuplicate(formData);
-    
-    if (duplicates) {
-        console.log('⚠️ Duplicate detected:', duplicates);
-        
-        // Show confirmation dialog
-        showDuplicateConfirmDialog(
-            formData.product,
-            // User chose: "This is a new problem"
-            () => {
-                console.log('User confirmed: This is a new problem');
-                proceedWithSubmission(formData);
-            },
-            // User chose: "This is the same request"
-            () => {
-                formMessage.classList.add('error');
-                formMessage.textContent = '⚠️ Submission cancelled. You can modify your request or contact support if needed.';
-                console.log('User cancelled: Same request');
-            }
-        );
-        return;
-    }
-
-    // No duplicates, proceed with submission
+    // Proceed with submission directly (no duplicate check)
     proceedWithSubmission(formData);
 });
 
@@ -355,9 +272,6 @@ async function proceedWithSubmission(formData) {
     try {
         // Submit form to server
         const response = await submitFormData(formData);
-
-        // Add to history
-        duplicateDetector.addToHistory(formData, response.submissionId);
 
         // Show success message
         formMessage.classList.add('success');
