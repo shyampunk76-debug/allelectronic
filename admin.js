@@ -157,16 +157,48 @@ itemsPerPageSelect.addEventListener('change', async (e) => {
 });
 btnSearch.addEventListener('click', async () => {
   const search = searchId.value.trim();
-  if (!search) return showStatus('Enter text to search', true);
+  if (!search) {
+    showStatus('Enter text to search', true);
+    return;
+  }
   showStatus('Searching...');
-  const result = await adminRequest('/api/admin/requests', { search });
+  currentPage = 1; // Reset to page 1 for search
+  const result = await adminRequest('/api/admin/requests', { search, page: currentPage, limit: itemsPerPage });
   if (result.status === 'success') {
     clearTable();
-    (result.data || []).forEach((r, index) => requestsTableBody.appendChild(renderRow(r, index + 1)));
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    (result.data || []).forEach((r, index) => requestsTableBody.appendChild(renderRow(r, startIndex + index + 1)));
     attachRowHandlers();
-    showStatus(`Found ${result.data.length} result(s)`);
+    
+    // Update pagination for search results
+    if (result.pagination) {
+      totalPages = result.pagination.pages || 1;
+      totalRecords = result.pagination.total || 0;
+      updatePaginationUI();
+    }
+    
+    showStatus(`Found ${result.data.length} result(s) matching "${search}"`);
   } else {
     showStatus(result.message || 'Search failed', true);
+  }
+});
+
+// Allow search on Enter key
+searchId.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    btnSearch.click();
+  }
+});
+
+// Clear search and refresh when input is cleared
+searchId.addEventListener('input', (e) => {
+  if (e.target.value.trim() === '') {
+    // Auto-refresh when search is cleared
+    setTimeout(() => {
+      if (searchId.value.trim() === '') {
+        loadRequests();
+      }
+    }, 300);
   }
 });
 

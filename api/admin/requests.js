@@ -44,7 +44,19 @@ async function handler(req, res) {
   try {
     console.log('admin/requests: mongoose connection state =', mongoose.connection && mongoose.connection.readyState);
     if (mongoose.connection && mongoose.connection.readyState === 1) {
-      const query = search ? { $or: [ { id: { $regex: search, $options: 'i' } }, { name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } } ] } : {};
+      // Search across all fields if search term provided
+      const query = search ? { 
+        $or: [ 
+          { id: { $regex: search, $options: 'i' } },
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { phone: { $regex: search, $options: 'i' } },
+          { product: { $regex: search, $options: 'i' } },
+          { issue: { $regex: search, $options: 'i' } },
+          { status: { $regex: search, $options: 'i' } },
+          { payment: { $regex: search, $options: 'i' } }
+        ] 
+      } : {};
       const results = await RepairRequestModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
       const total = await RepairRequestModel.countDocuments(query);
       return res.json({ status: 'success', data: results, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
