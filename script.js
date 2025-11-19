@@ -15,7 +15,7 @@ console.log('🔧 API Configuration:', {
 // MODAL DIALOG SYSTEM
 // ========================================
 
-function showDuplicateConfirmDialog(product, duplicateInfo, onAllow, onCancel) {
+function showDuplicateConfirmDialog(duplicateInfo, onAllow, onCancel) {
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.style.cssText = `
@@ -62,7 +62,7 @@ function showDuplicateConfirmDialog(product, duplicateInfo, onAllow, onCancel) {
                 font-weight: 600;
                 color: #1a1a2e;
             ">
-                📦 ${escapeHtml(product)}
+                📦 ${escapeHtml(duplicateInfo.product)}
             </p>
             <p style="color: #666; line-height: 1.6; margin: 0 0 10px 0;">
                 <strong>Request ID:</strong> ${escapeHtml(duplicateInfo.id)}<br>
