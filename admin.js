@@ -348,11 +348,19 @@ window.addEventListener('load', () => {
     document.querySelector('.login').style.display = 'none';
     adminArea.classList.remove('hidden');
     
+    // Display user role info
+    const roleInfo = document.getElementById('userRoleInfo');
+    const roleDisplay = currentUserRole === 'admin' ? '👑 Administrator' : '👤 Staff User';
+    const permissions = currentUserRole === 'admin' 
+      ? 'Full access: View, Edit, Delete, Export'
+      : 'Limited access: View, Edit, Export only';
+    roleInfo.innerHTML = `<strong>${roleDisplay}</strong> • ${permissions}`;
+    
     // Show/hide delete button based on role
     if (currentUserRole === 'admin') {
-      btnDeleteSelected.classList.remove('hidden');
+      btnDeleteSelected.style.display = 'none'; // Hidden by default until selection
     } else {
-      btnDeleteSelected.classList.add('hidden');
+      btnDeleteSelected.style.display = 'none'; // Always hidden for non-admin
     }
     
     loadRequests();
@@ -449,6 +457,8 @@ function updateActionButtonsVisibility() {
     if (currentUserRole === 'admin') {
       deleteBtn.style.display = 'inline-block';
       deleteBtn.textContent = `🗑️ Delete Selected (${selectedCheckboxes.length})`;
+    } else {
+      deleteBtn.style.display = 'none';
     }
   } else {
     exportBtn.classList.add('hidden');
