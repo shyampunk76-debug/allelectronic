@@ -35,6 +35,14 @@ module.exports = async (req, res) => {
   // Attempt DB connection before processing update
   try {
     await connectDB();
+    
+    // Wait a bit for connection to be ready
+    let retries = 0;
+    while (mongoose.connection.readyState !== 1 && retries < 10) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      retries++;
+    }
+    
     console.log('update-status: DB connection state:', mongoose.connection.readyState);
   } catch (e) {
     console.error('update-status: DB connection error:', e);
@@ -48,7 +56,8 @@ module.exports = async (req, res) => {
   try {
     // Check if database is connected
     if (!mongoose.connection || mongoose.connection.readyState !== 1) {
-      console.error('update-status: DB not connected');
+      console.error('update-status: DB not connected, readyState:', mongoose.connection?.readyState);
+      console.error('update-status: ENV check - MONGODB_URI_NEW exists:', !!process.env.MONGODB_URI_NEW);
       return res.status(500).json({ status: 'error', message: 'Database not available' });
     }
 

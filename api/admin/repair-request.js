@@ -5,9 +5,16 @@ const RepairRequestModel = require('../../models/RepairRequest');
 connectDB().catch(() => {});
 
 module.exports = async (req, res) => {
-  // Ensure DB connection attempt before handling
+  // Ensure DB connection is attempted before handling
   try {
     await connectDB();
+    
+    // Wait for connection to be ready
+    let retries = 0;
+    while (mongoose.connection.readyState !== 1 && retries < 10) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      retries++;
+    }
   } catch (e) {
     // logged in connectDB
   }

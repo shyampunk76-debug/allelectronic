@@ -16,6 +16,13 @@ async function handler(req, res) {
     // Ensure DB connection attempt before proceeding
     try {
       await connectDB();
+      
+      // Wait for connection to be ready
+      let retries = 0;
+      while (mongoose.connection.readyState !== 1 && retries < 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
     } catch (e) {
       // connectDB already logs
     }
