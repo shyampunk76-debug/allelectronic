@@ -1,170 +1,244 @@
-# All Electronic - Repair Request Website
+# All Electronic - Repair Service Management System
 
-![Status](https://img.shields.io/badge/status-active-brightgreen)
-![Node.js](https://img.shields.io/badge/node.js-25.2.1-green)
-![GitHub](https://img.shields.io/badge/github-integrated-blue)
+![Status](https://img.shields.io/badge/status-production-brightgreen)
+![Node.js](https://img.shields.io/badge/node.js-v18+-green)
+![MongoDB](https://img.shields.io/badge/mongodb-atlas-green)
+![Vercel](https://img.shields.io/badge/vercel-deployed-black)
 
-A professional web application for managing home appliance and electronics repair service requests with an admin dashboard.
+A professional web application for managing home appliance and electronics repair service requests with a secure admin dashboard.
 
-## 🚀 Quick Start
+## 🚀 Features
 
-```bash
-# Navigate to this project
-cd projects/allelectronic-website
+### Customer Portal
+- **Repair Request Form**: Easy-to-use form for submitting repair requests
+- **Service Categories**: Kitchen appliances, Washing machines, HVAC, Electronics
+- **Real-time Validation**: Client-side form validation with helpful error messages
+- **Responsive Design**: Works seamlessly on mobile, tablet, and desktop
 
-# Install dependencies
-npm install
+### Admin Dashboard
+- **Secure Authentication**: Database-driven login system with JWT tokens
+- **Request Management**: View, search, and manage all repair requests
+- **Status Updates**: Update repair status (pending, in-progress, completed, cancelled)
+- **Payment Tracking**: Track payment status (payment-pending, processing, paid)
+- **Search & Filter**: Find requests by ID, customer name, or email
+- **Pagination**: Efficient handling of large request lists
 
-# Set up environment
-cp .env.example .env
-# Edit .env with your MongoDB URI and credentials
+## 🏗️ Tech Stack
 
-# Start development server
-npm run dev
-# OR for local testing
-node test-server.js
-```
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Backend**: Node.js with Vercel Serverless Functions
+- **Database**: MongoDB Atlas with Mongoose ODM
+- **Authentication**: JWT (JSON Web Tokens)
+- **Deployment**: Vercel
 
-## 📋 Features
+## 📦 Installation & Setup
 
-- **Modern, Responsive Design**: Mobile-friendly interface with smooth animations
-- **Repair Request Form**: Captures customer information with real-time validation
-  - Name, Email, Phone, Product Details, Issue Description
-  - Service Categories (Kitchen, Washing Machines, HVAC, Electronics)
-  - Form validation and error messages
-  
-- **Admin Dashboard**: Secure admin console for managing requests
-  - View all repair requests with pagination
-  - Search by ID, customer name, or email
-  - Update repair and payment status
-  - JWT-based authentication (8-hour token expiration)
-
-- **MongoDB Integration**: Persistent storage for requests and admin credentials
-  - Repair requests collection
-  - Admin users collection with role-based access
-
-## 🏗️ Project Structure
-
-```
-allelectronic-website/
-├── index.html                 # Main landing page with repair form
-├── admin.html                 # Admin dashboard
-├── styles.css                 # Main site styling
-├── admin.css                  # Admin dashboard styling
-├── script.js                  # Frontend form and modal logic
-├── admin.js                   # Admin console functionality
-│
-├── api/                       # Vercel serverless functions
-│   ├── index.js              # Main API entry point
-│   ├── health.js             # Health check endpoint
-│   ├── repair-request.js     # POST repair requests
-│   │
-│   ├── admin/                # Protected admin endpoints
-│   │   ├── login.js          # POST JWT authentication
-│   │   ├── requests.js       # GET all repair requests (paginated)
-│   │   ├── repair-request.js # GET/PUT single request details
-│   │   └── update-status.js  # PUT update request status
-│   │
-│   └── middleware/
-│       └── auth.js           # JWT verification middleware
-│
-├── models/                    # Mongoose database schemas
-│   ├── AdminUser.js          # Admin user schema
-│   └── RepairRequest.js      # Repair request schema
-│
-├── test-server.js            # Local development server
-└── package.json              # Dependencies and scripts
-```
-
-## ⚙️ Environment Setup
-
-1. **Configure MongoDB:**
-   ```env
-   MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/allelectronic
-   ```
-
-2. **Admin Credentials:**
-   ```env
-   ADMIN_USER=Admin
-   ADMIN_PASS=YourSecurePassword
-   JWT_SECRET=your-super-secret-jwt-key
-   ```
-
-3. **Server Settings:**
-   ```env
-   PORT=3000
-   NODE_ENV=development
-   ```
-
-## 🌐 API Endpoints
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/health` | Health check | No |
-| `POST` | `/api/repair-request` | Submit repair request | No |
-| `POST` | `/api/admin/login` | Admin authentication | No |
-| `GET` | `/api/admin/requests` | List all requests | Yes |
-| `GET` | `/api/admin/repair-request` | Get specific request | Yes |
-| `PUT` | `/api/admin/update-status` | Update request status | Yes |
-
-## 🚀 Deployment
-
-### Vercel (Production)
-```bash
-npm install -g vercel
-vercel deploy --prod
-```
+### Prerequisites
+- Node.js 18+ installed
+- MongoDB Atlas account
+- Vercel account (for deployment)
 
 ### Local Development
-```bash
-node test-server.js
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/shyampunk76-debug/allelectronic.git
+   cd allelectronic
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up MongoDB Atlas**
+   - Create a MongoDB Atlas cluster
+   - Create a database named `allelectronic`
+   - Add your IP address to Network Access (or allow 0.0.0.0/0 for testing)
+   - Get your connection string
+
+4. **Configure environment variables**
+   
+   Create a `.env` file (for local testing only):
+   ```env
+   MONGODB_URI_NEW=mongodb+srv://username:password@cluster.mongodb.net/allelectronic?retryWrites=true&w=majority
+   JWT_SECRET=your-secure-random-string
+   NODE_ENV=development
+   ```
+   
+   **Important**: Never commit `.env` to git. It's already in `.gitignore`.
+
+5. **Create admin user**
+   ```bash
+   node scripts/create-admin.js
+   ```
+   
+   This creates an admin user:
+   - Username: `Admin`
+   - Password: `Passw0rd`
+
+6. **Run local test server**
+   ```bash
+   node test-server.js
+   ```
+   
+   Visit: `http://localhost:3001`
+
+## 🌐 Deployment to Vercel
+
+### 1. Deploy to Vercel
+   ```bash
+   # Install Vercel CLI
+   npm install -g vercel
+   
+   # Deploy
+   vercel --prod
+   ```
+
+### 2. Configure Environment Variables in Vercel
+
+Go to your Vercel project → Settings → Environment Variables and add:
+
+**MONGODB_URI_NEW**:
 ```
-Visit: http://localhost:3000
+mongodb+srv://username:password@cluster.mongodb.net/allelectronic?retryWrites=true&w=majority
+```
+⚠️ **Important**: URL-encode special characters in password (e.g., `@` becomes `%40`)
 
-## 🛠️ Technologies Used
+**JWT_SECRET**:
+```
+your-secure-random-string-here
+```
+💡 Generate one: `openssl rand -hex 32`
 
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT (JSON Web Tokens)
-- **Deployment**: Vercel serverless functions
-- **Styling**: CSS3 with Flexbox/Grid
+**NODE_ENV**:
+```
+production
+```
 
-## 📱 Responsive Design
+### 3. Redeploy after setting environment variables
 
-- Mobile-first approach
-- Breakpoints for tablets and desktop
-- Touch-friendly interface
-- Optimized performance
+## 📁 Project Structure
 
-## 🔒 Security Features
+```
+allelectronic/
+├── index.html              # Customer-facing repair request page
+├── admin.html              # Admin dashboard
+├── script.js               # Customer page functionality
+├── admin.js                # Admin dashboard functionality
+├── styles.css              # Main styles
+├── admin.css               # Admin dashboard styles
+├── db.js                   # MongoDB connection handler
+├── test-server.js          # Local development server
+├── package.json            # Dependencies
+├── vercel.json             # Vercel configuration
+│
+├── api/                    # Vercel serverless functions
+│   ├── health.js           # Health check endpoint
+│   ├── repair-request.js   # Submit repair requests
+│   ├── admin/
+│   │   ├── login.js        # Admin authentication
+│   │   ├── requests.js     # List all requests (paginated)
+│   │   ├── repair-request.js # Get single request
+│   │   └── update-status.js  # Update request status
+│   └── middleware/
+│       └── auth.js         # JWT authentication middleware
+│
+├── models/
+│   ├── AdminUser.js        # Admin user schema
+│   └── RepairRequest.js    # Repair request schema
+│
+└── scripts/
+    ├── create-admin.js     # Create admin users
+    ├── list-admins.js      # List all admin users
+    └── check-collections.js # Check database collections
+```
 
-- JWT-based authentication
-- Input validation and sanitization
-- CORS configuration
-- Environment variable protection
+## 🔌 API Endpoints
 
-## 📊 Admin Dashboard Features
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/health` | Health check | No |
+| `POST` | `/api/repair-request` | Submit new repair request | No |
+| `POST` | `/api/admin/login` | Admin login (returns JWT) | No |
+| `POST` | `/api/admin/requests` | Get all requests (paginated) | Yes |
+| `POST` | `/api/admin/repair-request` | Get single request details | Yes |
+| `POST` | `/api/admin/update-status` | Update request status/payment | Yes |
 
-- Request status management
-- Payment tracking
-- Search and filter functionality
-- Responsive data tables
-- Real-time updates
+## 🗄️ Database Schema
+
+### Admin Users Collection (`adminusers`)
+```javascript
+{
+  username: String (unique),
+  password: String,
+  email: String (unique),
+  role: String (enum: ['admin', 'moderator']),
+  isActive: Boolean,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Repair Requests Collection (`repairrequests`)
+```javascript
+{
+  id: String (unique, e.g., "REP-1731234567890"),
+  name: String,
+  email: String,
+  phone: String,
+  product: String,
+  issue: String,
+  serviceType: String (nullable),
+  status: String (enum: ['pending', 'in-progress', 'completed', 'cancelled']),
+  payment: String (enum: ['payment-pending', 'processing', 'paid']),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+## 🛠️ Utility Scripts
+
+### Create Admin User
+```bash
+node scripts/create-admin.js
+```
+
+### List All Admins
+```bash
+node scripts/list-admins.js
+```
+
+### Check Database Collections
+```bash
+node scripts/check-collections.js
+```
+
+## 🔒 Security
+
+- ✅ JWT-based authentication with 8-hour token expiration
+- ✅ Password stored in database (not environment variables)
+- ✅ CORS enabled for cross-origin requests
+- ✅ Input validation on both client and server
+- ✅ Environment variables for sensitive data
+- ✅ MongoDB connection string with secure credentials
+
+## 📝 Admin Access
+
+**Default Admin Credentials** (created by `create-admin.js`):
+- Username: `Admin`
+- Password: `Passw0rd`
+
+⚠️ **Change the password after first login for production use!**
 
 ## 🤝 Contributing
 
-This project is part of the [Shyampunk76 Portfolio](../../README.md). For contributions:
+Contributions, issues, and feature requests are welcome!
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+## 📄 License
 
-## 📝 License
-
-MIT License - See main repository for details.
+MIT License
 
 ---
 
-**Part of the [Shyampunk76 Development Portfolio](../../README.md)**
+**Developed by Shyampunk76** | [GitHub](https://github.com/shyampunk76-debug/allelectronic)
