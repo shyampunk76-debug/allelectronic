@@ -31,10 +31,11 @@ function logout() {
 
 function clearTable() { requestsTableBody.innerHTML = ''; }
 
-function renderRow(r) {
+function renderRow(r, index) {
   const tr = document.createElement('tr');
   tr.dataset.id = r.id;
   tr.innerHTML = `
+    <td class="serial-num">${index}</td>
     <td class="small">${r.id}</td>
     <td>${r.name}</td>
     <td class="email-cell">${r.email || ''}</td>
@@ -124,7 +125,7 @@ btnSearch.addEventListener('click', async () => {
   const result = await adminRequest('/api/admin/requests', { search });
   if (result.status === 'success') {
     clearTable();
-    (result.data || []).forEach(r => requestsTableBody.appendChild(renderRow(r)));
+    (result.data || []).forEach((r, index) => requestsTableBody.appendChild(renderRow(r, index + 1)));
     attachRowHandlers();
     showStatus(`Found ${result.data.length} result(s)`);
   } else {
@@ -137,7 +138,7 @@ async function loadRequests() {
   const result = await adminRequest('/api/admin/requests', { page: 1, limit: itemsPerPage });
   if (result.status === 'success') {
     clearTable();
-    (result.data || []).forEach(r => requestsTableBody.appendChild(renderRow(r)));
+    (result.data || []).forEach((r, index) => requestsTableBody.appendChild(renderRow(r, index + 1)));
     attachRowHandlers();
     const pagInfo = result.pagination ? ` (${result.pagination.total} total)` : '';
     showStatus(`Loaded ${result.data.length} requests${pagInfo}`);

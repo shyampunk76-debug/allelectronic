@@ -17,6 +17,7 @@ input { width:100%; padding:8px 10px; margin-top:6px; border:1px solid #e5e7eb; 
 .items-per-page select:hover { border-color:#667eea }
 #requestsTable { width:100%; border-collapse:collapse; margin-top:12px }
 #requestsTable th, #requestsTable td { padding:8px 10px; border-bottom:1px solid #eef2ff; text-align:left }
+.serial-num { font-weight:600; color:#6b7280; text-align:center; width:40px }
 .status { margin:12px 0; color:#374151 }
 .actionBtn { padding:6px 8px; border-radius:6px; border:1px solid #ddd; cursor:pointer; background:white }
 .select { padding:6px }
