@@ -18,8 +18,21 @@ module.exports = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Username and password required' });
     }
 
+    // Debug logging (remove after testing)
+    console.log('Login attempt:', { username, hasPassword: !!password });
+    console.log('Expected user:', process.env.ADMIN_USER);
+    console.log('Env vars present:', { 
+      hasAdminUser: !!process.env.ADMIN_USER, 
+      hasAdminPass: !!process.env.ADMIN_PASS,
+      hasJwtSecret: !!process.env.JWT_SECRET
+    });
+
     if (username !== process.env.ADMIN_USER || password !== process.env.ADMIN_PASS) {
-      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+      return res.status(401).json({ 
+        status: 'error', 
+        message: 'Invalid credentials',
+        debug: `Expected user: ${process.env.ADMIN_USER ? 'set' : 'NOT SET'}`
+      });
     }
 
     const secret = process.env.JWT_SECRET || 'ae-admin-secret-change-this';
