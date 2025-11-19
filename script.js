@@ -558,14 +558,19 @@ if (adminQuickLoginForm) {
             });
             const data = await res.json();
             
-            if (data.status === 'success') {
-                // Store token and redirect to admin page
+            if (data.status === 'success' && data.user && data.user.role) {
+                // Store token AND role, then redirect to admin page
                 sessionStorage.setItem('admin_token', data.token);
+                sessionStorage.setItem('admin_role', data.user.role);
+                console.log('Login successful - Token and role stored:', data.user.role);
                 adminQuickMsg.style.color = '#065f46';
                 adminQuickMsg.textContent = '✅ Signed in! Redirecting...';
                 setTimeout(() => {
                     window.location.href = '/admin.html';
                 }, 800);
+            } else if (data.status === 'success' && (!data.user || !data.user.role)) {
+                adminQuickMsg.style.color = '#b91c1c';
+                adminQuickMsg.textContent = '❌ Server error: User role missing';
             } else {
                 adminQuickMsg.style.color = '#b91c1c';
                 adminQuickMsg.textContent = '❌ ' + (data.message || 'Sign in failed');
