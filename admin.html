@@ -31,6 +31,7 @@
         <input id="searchId" placeholder="Search by Submission ID (e.g. REP-12345)" />
         <button id="btnSearch">Search</button>
         <button id="btnRefresh">Refresh List</button>
+        <button id="btnDeleteSelected" class="btn-delete hidden" style="background-color: #dc2626; margin-left: 10px;">🗑️ Delete Selected</button>
         <div class="items-per-page">
           <label for="itemsPerPage">Show:</label>
           <select id="itemsPerPage">
@@ -48,6 +49,7 @@
       <table id="requestsTable">
         <thead>
           <tr>
+            <th><input type="checkbox" id="selectAll" title="Select all"></th>
             <th>#</th>
             <th>ID</th>
             <th>Name</th>

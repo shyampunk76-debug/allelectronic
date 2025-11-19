@@ -6,11 +6,14 @@ const requestsTableBody = document.querySelector('#requestsTable tbody');
 const btnRefresh = document.getElementById('btnRefresh');
 const btnSearch = document.getElementById('btnSearch');
 const btnLogout = document.getElementById('btnLogout');
+const btnDeleteSelected = document.getElementById('btnDeleteSelected');
+const selectAllCheckbox = document.getElementById('selectAll');
 const searchId = document.getElementById('searchId');
 
 const API_BASE = window.location.origin;
 let authToken = null;
 let itemsPerPage = 50;
+let currentUserRole = null; // Store user role from login
 
 function showStatus(msg, isError = false) {
   statusMessage.textContent = msg;
@@ -19,7 +22,9 @@ function showStatus(msg, isError = false) {
 
 function logout() {
   authToken = null;
+  currentUserRole = null;
   sessionStorage.removeItem('admin_token');
+  sessionStorage.removeItem('admin_role');
   adminArea.classList.add('hidden');
   document.querySelector('.login').style.display = 'block';
   clearTable();
@@ -35,6 +40,7 @@ function renderRow(r, index) {
   const tr = document.createElement('tr');
   tr.dataset.id = r.id;
   tr.innerHTML = `
+    <td><input type="checkbox" class="row-checkbox" data-id="${r.id}"></td>
     <td class="serial-num">${index}</td>
     <td class="small">${r.id}</td>
     <td>${r.name}</td>
@@ -106,10 +112,20 @@ adminLoginForm.addEventListener('submit', async (e) => {
     const data = await res.json();
     if (data.status === 'success') {
       authToken = data.token;
+      currentUserRole = data.user && data.user.role ? data.user.role : 'admin';
       sessionStorage.setItem('admin_token', authToken);
+      sessionStorage.setItem('admin_role', currentUserRole);
       showStatus('Signed in');
       document.querySelector('.login').style.display = 'none';
       adminArea.classList.remove('hidden');
+      
+      // Show/hide delete button based on role
+      if (currentUserRole === 'admin') {
+        btnDeleteSelected.classList.remove('hidden');
+      } else {
+        btnDeleteSelected.classList.add('hidden');
+      }
+      
       await loadRequests();
     } else {
       showStatus(data.message || 'Sign in failed', true);
@@ -210,6 +226,11 @@ function attachRowHandlers() {
       }
     };
   });
+  
+  // Attach checkbox change handlers
+  document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', updateDeleteButtonVisibility);
+  });
 }
 
 function findById(id) {
@@ -226,10 +247,78 @@ function findById(id) {
 // Load stored token on page load
 window.addEventListener('load', () => {
   const stored = sessionStorage.getItem('admin_token');
+  const storedRole = sessionStorage.getItem('admin_role');
   if (stored) {
     authToken = stored;
+    currentUserRole = storedRole || 'admin';
     document.querySelector('.login').style.display = 'none';
     adminArea.classList.remove('hidden');
+    
+    // Show/hide delete button based on role
+    if (currentUserRole === 'admin') {
+      btnDeleteSelected.classList.remove('hidden');
+    } else {
+      btnDeleteSelected.classList.add('hidden');
+    }
+    
     loadRequests();
+  }
+});
+
+// Select all checkbox handler
+selectAllCheckbox.addEventListener('change', (e) => {
+  const checkboxes = document.querySelectorAll('.row-checkbox');
+  checkboxes.forEach(cb => cb.checked = e.target.checked);
+  updateDeleteButtonVisibility();
+});
+
+// Update delete button visibility based on selection
+function updateDeleteButtonVisibility() {
+  const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+  const deleteBtn = btnDeleteSelected;
+  
+  if (currentUserRole === 'admin' && selectedCheckboxes.length > 0) {
+    deleteBtn.style.display = 'inline-block';
+    deleteBtn.textContent = `🗑️ Delete Selected (${selectedCheckboxes.length})`;
+  } else {
+    deleteBtn.style.display = 'none';
+  }
+}
+
+// Delete selected requests
+btnDeleteSelected.addEventListener('click', async () => {
+  const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+  const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+  
+  if (selectedIds.length === 0) {
+    showStatus('No requests selected', true);
+    return;
+  }
+  
+  const confirmMsg = `Are you sure you want to delete ${selectedIds.length} request(s)?\n\nThis action cannot be undone!\n\nIDs to delete:\n${selectedIds.join(', ')}`;
+  
+  if (!confirm(confirmMsg)) {
+    return;
+  }
+  
+  showStatus(`Deleting ${selectedIds.length} request(s)...`);
+  btnDeleteSelected.disabled = true;
+  
+  try {
+    const res = await adminRequest('/api/admin/delete-requests', { ids: selectedIds });
+    
+    if (res && res.status === 'success') {
+      showStatus(`Successfully deleted ${res.deletedCount} request(s)`);
+      selectAllCheckbox.checked = false;
+      await loadRequests();
+    } else {
+      const msg = res && res.message ? res.message : 'Delete failed';
+      showStatus(msg, true);
+    }
+  } catch (err) {
+    showStatus('Delete error: ' + err.message, true);
+  } finally {
+    btnDeleteSelected.disabled = false;
+    updateDeleteButtonVisibility();
   }
 });
