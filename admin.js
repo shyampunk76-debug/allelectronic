@@ -367,3 +367,238 @@ btnNextPage.addEventListener('click', async () => {
     await loadRequests();
   }
 });
+
+// Export functionality
+const btnExportSelected = document.getElementById('btnExportSelected');
+const exportMenu = document.getElementById('exportMenu');
+
+// Update export button visibility along with delete button
+function updateActionButtonsVisibility() {
+  const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+  const deleteBtn = btnDeleteSelected;
+  const exportBtn = btnExportSelected;
+  
+  if (selectedCheckboxes.length > 0) {
+    exportBtn.classList.remove('hidden');
+    exportBtn.textContent = `📥 Export Selected (${selectedCheckboxes.length})`;
+    
+    if (currentUserRole === 'admin') {
+      deleteBtn.style.display = 'inline-block';
+      deleteBtn.textContent = `🗑️ Delete Selected (${selectedCheckboxes.length})`;
+    }
+  } else {
+    exportBtn.classList.add('hidden');
+    deleteBtn.style.display = 'none';
+    exportMenu.classList.add('hidden');
+  }
+}
+
+// Replace old updateDeleteButtonVisibility with new function
+function updateDeleteButtonVisibility() {
+  updateActionButtonsVisibility();
+}
+
+// Toggle export menu
+btnExportSelected.addEventListener('click', (e) => {
+  e.stopPropagation();
+  exportMenu.classList.toggle('hidden');
+});
+
+// Close export menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.export-controls')) {
+    exportMenu.classList.add('hidden');
+  }
+});
+
+// Get selected requests data
+function getSelectedRequestsData() {
+  const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+  const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+  
+  return selectedIds.map(id => {
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (!row) return null;
+    
+    return {
+      id: id,
+      name: row.querySelector('td:nth-child(4)')?.textContent || '',
+      email: row.querySelector('.email-cell')?.textContent || '',
+      phone: row.querySelector('.phone-cell')?.textContent || '',
+      product: row.querySelector('td:nth-child(7)')?.textContent || '',
+      issue: row.querySelector('td:nth-child(8)')?.textContent || '',
+      status: row.querySelector('.statusSelect')?.value || '',
+      payment: row.querySelector('.paymentSelect')?.value || ''
+    };
+  }).filter(Boolean);
+}
+
+// Export to Excel
+function exportToExcel(data) {
+  if (data.length === 0) {
+    showStatus('No data to export', true);
+    return;
+  }
+  
+  // Prepare data for Excel
+  const worksheet_data = [
+    ['Repair Requests Export', '', '', '', '', '', '', ''],
+    ['Generated on:', new Date().toLocaleString(), '', '', '', '', '', ''],
+    ['Total Records:', data.length, '', '', '', '', '', ''],
+    [],
+    ['ID', 'Name', 'Email', 'Phone', 'Product', 'Issue', 'Status', 'Payment']
+  ];
+  
+  data.forEach(item => {
+    worksheet_data.push([
+      item.id,
+      item.name,
+      item.email,
+      item.phone,
+      item.product,
+      item.issue,
+      item.status,
+      item.payment
+    ]);
+  });
+  
+  // Create workbook and worksheet
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(worksheet_data);
+  
+  // Set column widths
+  ws['!cols'] = [
+    { wch: 18 }, // ID
+    { wch: 15 }, // Name
+    { wch: 25 }, // Email
+    { wch: 15 }, // Phone
+    { wch: 20 }, // Product
+    { wch: 40 }, // Issue
+    { wch: 12 }, // Status
+    { wch: 15 }  // Payment
+  ];
+  
+  // Merge cells for title
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }
+  ];
+  
+  // Add styling to header row (row 5, index 4)
+  const headerRow = 4;
+  ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].forEach(col => {
+    const cellRef = col + (headerRow + 1);
+    if (ws[cellRef]) {
+      ws[cellRef].s = {
+        font: { bold: true },
+        fill: { fgColor: { rgb: "667eea" } },
+        alignment: { horizontal: "center" }
+      };
+    }
+  });
+  
+  XLSX.utils.book_append_sheet(wb, ws, "Repair Requests");
+  
+  // Generate filename with timestamp
+  const filename = `repair_requests_${new Date().toISOString().split('T')[0]}_${Date.now()}.xlsx`;
+  XLSX.writeFile(wb, filename);
+  
+  showStatus(`Successfully exported ${data.length} record(s) to Excel`);
+  exportMenu.classList.add('hidden');
+}
+
+// Export to PDF
+function exportToPDF(data) {
+  if (data.length === 0) {
+    showStatus('No data to export', true);
+    return;
+  }
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
+  
+  // Add title
+  doc.setFontSize(18);
+  doc.setTextColor(102, 126, 234);
+  doc.text('Repair Requests Export', 14, 20);
+  
+  // Add metadata
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+  doc.text(`Total Records: ${data.length}`, 14, 33);
+  
+  // Prepare table data
+  const tableData = data.map(item => [
+    item.id,
+    item.name,
+    item.email,
+    item.phone,
+    item.product,
+    item.issue.substring(0, 50) + (item.issue.length > 50 ? '...' : ''), // Truncate long issues
+    item.status,
+    item.payment
+  ]);
+  
+  // Add table
+  doc.autoTable({
+    head: [['ID', 'Name', 'Email', 'Phone', 'Product', 'Issue', 'Status', 'Payment']],
+    body: tableData,
+    startY: 40,
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+      overflow: 'linebreak',
+      cellWidth: 'wrap'
+    },
+    headStyles: {
+      fillColor: [102, 126, 234],
+      textColor: 255,
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    columnStyles: {
+      0: { cellWidth: 28 }, // ID
+      1: { cellWidth: 25 }, // Name
+      2: { cellWidth: 35 }, // Email
+      3: { cellWidth: 25 }, // Phone
+      4: { cellWidth: 30 }, // Product
+      5: { cellWidth: 60 }, // Issue
+      6: { cellWidth: 22 }, // Status
+      7: { cellWidth: 25 }  // Payment
+    },
+    alternateRowStyles: {
+      fillColor: [245, 247, 250]
+    },
+    margin: { top: 40, left: 14, right: 14 }
+  });
+  
+  // Add page numbers
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() - 30, doc.internal.pageSize.getHeight() - 10);
+  }
+  
+  // Generate filename with timestamp
+  const filename = `repair_requests_${new Date().toISOString().split('T')[0]}_${Date.now()}.pdf`;
+  doc.save(filename);
+  
+  showStatus(`Successfully exported ${data.length} record(s) to PDF`);
+  exportMenu.classList.add('hidden');
+}
+
+// Handle export format selection
+document.querySelectorAll('.export-option').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const format = e.target.dataset.format;
+    const data = getSelectedRequestsData();
+    
+    if (format === 'xlsx') {
+      exportToExcel(data);
+    } else if (format === 'pdf') {
+      exportToPDF(data);
+    }
+  });
+});

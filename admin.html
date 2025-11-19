@@ -32,6 +32,13 @@
         <button id="btnSearch">Search</button>
         <button id="btnRefresh">Refresh List</button>
         <button id="btnDeleteSelected" class="btn-delete hidden" style="background-color: #dc2626; margin-left: 10px;">🗑️ Delete Selected</button>
+        <div class="export-controls">
+          <button id="btnExportSelected" class="btn-export hidden">📥 Export Selected</button>
+          <div id="exportMenu" class="export-menu hidden">
+            <button class="export-option" data-format="xlsx">📊 Export to Excel (.xlsx)</button>
+            <button class="export-option" data-format="pdf">📄 Export to PDF</button>
+          </div>
+        </div>
         <div class="items-per-page">
           <label for="itemsPerPage">Show:</label>
           <select id="itemsPerPage">
@@ -79,6 +86,11 @@
     </section>
   </main>
 
+  <!-- Export Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  
   <script src="admin.js"></script>
 </body>
 </html>
