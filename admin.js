@@ -1294,39 +1294,13 @@ window.editUser = function(userId, username, role) {
 
 // Reset user password
 window.resetUserPassword = async function(userId, username) {
-  const newPassword = prompt(`Enter new password for user "${username}":`);
-  
-  if (!newPassword) {
-    return;
-  }
-  
-  if (newPassword.length < 4) {
-    alert('Password must be at least 4 characters long');
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE}/api/admin/user-management`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
-      body: JSON.stringify({ userId, newPassword })
-    });
-    
-    const data = await response.json();
-    
-    if (response.ok) {
-      alert(`✅ Password updated successfully for ${username}`);
-      loadUsers();
-    } else {
-      alert('❌ ' + data.error);
-    }
-  } catch (error) {
-    console.error('Reset password error:', error);
-    alert('❌ Failed to reset password');
-  }
+  // Show reset password modal
+  document.getElementById('resetUserId').value = userId;
+  document.getElementById('resetUsername').value = username;
+  document.getElementById('resetUserDisplay').textContent = username;
+  document.getElementById('resetPasswordForm').reset();
+  document.getElementById('resetPasswordMessage').textContent = '';
+  document.getElementById('resetPasswordModal').classList.remove('hidden');
 };
 
 // Delete user
@@ -1447,3 +1421,76 @@ if (checkAuth()) {
   // Load repair requests
   loadRequests();
 }
+
+// Reset Password Modal Handlers
+const resetPasswordModal = document.getElementById('resetPasswordModal');
+const resetPasswordForm = document.getElementById('resetPasswordForm');
+const closeResetPasswordModal = document.getElementById('closeResetPasswordModal');
+const cancelResetPassword = document.getElementById('cancelResetPassword');
+const resetPasswordMessage = document.getElementById('resetPasswordMessage');
+
+closeResetPasswordModal?.addEventListener('click', () => {
+  resetPasswordModal.classList.add('hidden');
+});
+
+cancelResetPassword?.addEventListener('click', () => {
+  resetPasswordModal.classList.add('hidden');
+});
+
+resetPasswordForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const userId = document.getElementById('resetUserId').value;
+  const username = document.getElementById('resetUsername').value;
+  const newPassword = document.getElementById('resetNewPassword').value;
+  const confirmPassword = document.getElementById('resetConfirmPassword').value;
+  
+  // Validate passwords match
+  if (newPassword !== confirmPassword) {
+    resetPasswordMessage.textContent = '❌ Passwords do not match';
+    resetPasswordMessage.style.color = '#dc2626';
+    return;
+  }
+  
+  if (newPassword.length < 4) {
+    resetPasswordMessage.textContent = '❌ Password must be at least 4 characters';
+    resetPasswordMessage.style.color = '#dc2626';
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/admin/user-management`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ userId, newPassword })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      resetPasswordMessage.textContent = `✅ Password updated successfully for ${username}`;
+      resetPasswordMessage.style.color = '#10b981';
+      setTimeout(() => {
+        resetPasswordModal.classList.add('hidden');
+        loadUsers();
+      }, 1500);
+    } else {
+      resetPasswordMessage.textContent = '❌ ' + data.error;
+      resetPasswordMessage.style.color = '#dc2626';
+    }
+  } catch (error) {
+    console.error('Reset password error:', error);
+    resetPasswordMessage.textContent = '❌ Failed to reset password';
+    resetPasswordMessage.style.color = '#dc2626';
+  }
+});
+
+// Close modals on background click
+document.addEventListener('click', (e) => {
+  if (e.target === resetPasswordModal) {
+    resetPasswordModal.classList.add('hidden');
+  }
+});

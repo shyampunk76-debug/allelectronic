@@ -244,6 +244,36 @@
       </div>
     </div>
 
+    <!-- Reset User Password Modal -->
+    <div id="resetPasswordModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🔐 Reset User Password</h3>
+          <button class="modal-close" id="closeResetPasswordModal">×</button>
+        </div>
+        <form id="resetPasswordForm">
+          <input type="hidden" id="resetUserId">
+          <input type="hidden" id="resetUsername">
+          <div class="form-field">
+            <label>User: <strong id="resetUserDisplay"></strong></label>
+          </div>
+          <div class="form-field">
+            <label for="resetNewPassword">New Password *</label>
+            <input type="password" id="resetNewPassword" required autocomplete="new-password" minlength="4">
+          </div>
+          <div class="form-field">
+            <label for="resetConfirmPassword">Confirm New Password *</label>
+            <input type="password" id="resetConfirmPassword" required autocomplete="new-password" minlength="4">
+          </div>
+          <div id="resetPasswordMessage" style="margin-top: 10px; font-size: 0.9rem;"></div>
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn" style="background: #667eea;">Reset Password</button>
+            <button type="button" class="btn" style="background: #6b7280;" id="cancelResetPassword">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </main>
 
   <!-- Export Libraries -->
