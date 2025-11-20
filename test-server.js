@@ -58,7 +58,6 @@ app.listen(PORT, () => {
   
   // Display environment info
   console.log('\n📋 Environment Status:');
-  console.log(`   MongoDB URI: ${process.env.MONGODB_URI ? 'Configured' : 'Not set'}`);
-  console.log(`   Admin User: ${process.env.ADMIN_USER || 'Not set'}`);
-  console.log(`   JWT Secret: ${process.env.JWT_SECRET ? 'Configured' : 'Not set'}`);
+  console.log(`   MongoDB URI: ${process.env.MONGODB_URI_NEW || process.env.MONGODB_URI ? 'Configured ✓' : 'Not set'}`);
+  console.log(`   JWT Secret: ${process.env.JWT_SECRET ? 'Configured ✓' : 'Not set'}`);
 });
