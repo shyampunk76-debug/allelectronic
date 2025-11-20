@@ -94,10 +94,11 @@ npm install
 
 3. **Create `.env` file in the root directory:**
 ```env
-MONGODB_URI_NEW=mongodb+srv://username:password@cluster.mongodb.net/allelectronic?retryWrites=true&w=majority
-JWT_SECRET=your-random-secret-key-32-characters-long
+MONGODB_URI_NEW=your_mongodb_connection_string
+JWT_SECRET=your_secure_random_secret_key
 NODE_ENV=production
 ```
+Replace with your actual MongoDB Atlas connection string and a secure random JWT secret (minimum 32 characters).
 
 4. **Create an admin user:**
 ```bash
