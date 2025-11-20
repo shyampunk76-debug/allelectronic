@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const connectDB = require('../../db');
 const AdminUser = require('../../models/AdminUser');
 
@@ -33,8 +34,9 @@ module.exports = async (req, res) => {
       return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 
-    // Check password (plain text comparison)
-    if (adminUser.password !== password) {
+    // Check password using bcrypt
+    const isValidPassword = await bcrypt.compare(password, adminUser.password);
+    if (!isValidPassword) {
       console.log('Invalid password for user:', username);
       return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }

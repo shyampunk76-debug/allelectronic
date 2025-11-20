@@ -5,6 +5,7 @@
 
 require('dotenv').config();
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const AdminUser = require('../models/AdminUser');
 
 // Admin users to create
@@ -49,8 +50,17 @@ async function createAdminUsers() {
           continue;
         }
 
-        // Create new admin user
-        const user = new AdminUser(userData);
+        // Hash the password before creating the user
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        
+        // Create new admin user with hashed password
+        const user = new AdminUser({
+          username: userData.username,
+          password: hashedPassword,
+          email: userData.email,
+          role: userData.role,
+          isActive: userData.isActive
+        });
         await user.save();
         console.log(`✅ Created admin user: ${userData.username} (${userData.email})`);
       } catch (err) {
