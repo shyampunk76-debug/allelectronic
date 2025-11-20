@@ -1085,6 +1085,7 @@ const userManagementModal = document.getElementById('userManagementModal');
 const closeUserManagementModal = document.getElementById('closeUserManagementModal');
 
 btnManageUsers?.addEventListener('click', () => {
+  hideUserForm(); // Ensure form is hidden, list is shown
   userManagementModal.classList.remove('hidden');
   loadUsers(); // Load users when modal opens
 });
@@ -1174,12 +1175,12 @@ changePasswordForm?.addEventListener('submit', async (e) => {
 
 const usersTableBody = document.querySelector('#usersTable tbody');
 const btnAddUser = document.getElementById('btnAddUser');
-const userModal = document.getElementById('userModal');
 const userForm = document.getElementById('userForm');
-const closeUserModal = document.getElementById('closeUserModal');
-const cancelUserForm = document.getElementById('cancelUserForm');
+const userFormSection = document.getElementById('userFormSection');
+const userListSection = document.getElementById('userListSection');
+const btnCancelUserForm = document.getElementById('btnCancelUserForm');
 const userMessage = document.getElementById('userMessage');
-const userModalTitle = document.getElementById('userModalTitle');
+const userFormTitle = document.getElementById('userFormTitle');
 
 // Show user management button only for admins
 function updateUIForRole() {
@@ -1188,6 +1189,20 @@ function updateUIForRole() {
   } else {
     btnManageUsers?.classList.add('hidden');
   }
+}
+
+// Show user form, hide user list
+function showUserForm() {
+  userFormSection?.classList.remove('hidden');
+  userListSection?.classList.add('hidden');
+}
+
+// Hide user form, show user list
+function hideUserForm() {
+  userFormSection?.classList.add('hidden');
+  userListSection?.classList.remove('hidden');
+  userForm?.reset();
+  userMessage.textContent = '';
 }
 
 // Load all users
@@ -1247,7 +1262,7 @@ function renderUsersTable(users) {
 btnAddUser?.addEventListener('click', (e) => {
   e.preventDefault();
   e.stopPropagation();
-  userModalTitle.textContent = '➕ Add New User';
+  userFormTitle.textContent = '➕ Add New User';
   document.getElementById('editUserId').value = '';
   document.getElementById('userUsername').disabled = false;
   document.getElementById('passwordField').style.display = 'block';
@@ -1255,12 +1270,17 @@ btnAddUser?.addEventListener('click', (e) => {
   document.getElementById('btnSaveUser').textContent = 'Create User';
   userForm.reset();
   userMessage.textContent = '';
-  userModal.classList.remove('hidden');
+  showUserForm();
+});
+
+// Cancel user form
+btnCancelUserForm?.addEventListener('click', () => {
+  hideUserForm();
 });
 
 // Edit user (change role)
 window.editUser = function(userId, username, role) {
-  userModalTitle.textContent = '✏️ Edit User';
+  userFormTitle.textContent = '✏️ Edit User';
   document.getElementById('editUserId').value = userId;
   document.getElementById('userUsername').value = username;
   document.getElementById('userUsername').disabled = true;
@@ -1269,7 +1289,7 @@ window.editUser = function(userId, username, role) {
   document.getElementById('userPassword').required = false;
   document.getElementById('btnSaveUser').textContent = 'Update User';
   userMessage.textContent = '';
-  userModal.classList.remove('hidden');
+  showUserForm();
 };
 
 // Reset user password
@@ -1366,7 +1386,7 @@ userForm?.addEventListener('submit', async (e) => {
         userMessage.textContent = '✅ User updated successfully';
         userMessage.style.color = '#10b981';
         setTimeout(() => {
-          userModal.classList.add('hidden');
+          hideUserForm();
           loadUsers();
         }, 1000);
       } else {
@@ -1390,7 +1410,7 @@ userForm?.addEventListener('submit', async (e) => {
         userMessage.textContent = '✅ ' + data.message;
         userMessage.style.color = '#10b981';
         setTimeout(() => {
-          userModal.classList.add('hidden');
+          hideUserForm();
           loadUsers();
         }, 1000);
       } else {
@@ -1405,25 +1425,14 @@ userForm?.addEventListener('submit', async (e) => {
   }
 });
 
-// Close user modal
-closeUserModal?.addEventListener('click', () => {
-  userModal.classList.add('hidden');
-});
-
-cancelUserForm?.addEventListener('click', () => {
-  userModal.classList.add('hidden');
-});
-
 // Close modals on outside click
 window.addEventListener('click', (e) => {
   if (e.target === changePasswordModal) {
     changePasswordModal.classList.add('hidden');
   }
-  if (e.target === userModal) {
-    userModal.classList.add('hidden');
-  }
   if (e.target === userManagementModal) {
     userManagementModal.classList.add('hidden');
+    hideUserForm(); // Reset form when modal closes
   }
 });
 

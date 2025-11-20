@@ -156,24 +156,60 @@
           <button class="modal-close" id="closeUserManagementModal">×</button>
         </div>
         <div class="user-management-panel">
-          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <p style="margin: 0; color: #6b7280;">Manage staff users and administrators</p>
-            <button id="btnAddUser" class="btn" style="background: #10b981; padding: 8px 16px;">➕ Add New User</button>
+          
+          <!-- User Form (Add/Edit) - Initially Hidden -->
+          <div id="userFormSection" class="hidden" style="margin-bottom: 20px; padding: 20px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h4 id="userFormTitle" style="margin: 0;">➕ Add New User</h4>
+              <button type="button" id="btnCancelUserForm" class="btn" style="background: #6b7280; padding: 6px 12px; font-size: 0.9rem;">✕ Cancel</button>
+            </div>
+            <form id="userForm">
+              <input type="hidden" id="editUserId">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div class="form-field">
+                  <label for="userUsername">Username *</label>
+                  <input type="text" id="userUsername" required autocomplete="off">
+                </div>
+                <div class="form-field" id="passwordField">
+                  <label for="userPassword">Password *</label>
+                  <input type="password" id="userPassword" required autocomplete="new-password" minlength="4">
+                </div>
+                <div class="form-field">
+                  <label for="userRole">Role *</label>
+                  <select id="userRole" required>
+                    <option value="user">User (Staff)</option>
+                    <option value="admin">Admin (Full Access)</option>
+                  </select>
+                </div>
+              </div>
+              <div id="userMessage" style="margin-top: 10px; font-size: 0.9rem;"></div>
+              <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="submit" class="btn" style="background: #10b981;" id="btnSaveUser">Save User</button>
+              </div>
+            </form>
           </div>
 
-          <div id="usersTableContainer" class="table-container">
-            <table id="usersTable">
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Created</th>
-                  <th>Last Modified</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+          <!-- User List Section -->
+          <div id="userListSection">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <p style="margin: 0; color: #6b7280;">Manage staff users and administrators</p>
+              <button id="btnAddUser" class="btn" style="background: #10b981; padding: 8px 16px;">➕ Add New User</button>
+            </div>
+
+            <div id="usersTableContainer" class="table-container">
+              <table id="usersTable">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th>Last Modified</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -203,39 +239,6 @@
           <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button type="submit" class="btn" style="background: #667eea;">Change Password</button>
             <button type="button" class="btn" style="background: #6b7280;" id="cancelPasswordChange">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Add/Edit User Modal -->
-    <div id="userModal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="userModalTitle">➕ Add New User</h3>
-          <button class="modal-close" id="closeUserModal">×</button>
-        </div>
-        <form id="userForm">
-          <input type="hidden" id="editUserId">
-          <div class="form-field">
-            <label for="userUsername">Username *</label>
-            <input type="text" id="userUsername" required autocomplete="off">
-          </div>
-          <div class="form-field" id="passwordField">
-            <label for="userPassword">Password *</label>
-            <input type="password" id="userPassword" required autocomplete="new-password" minlength="4">
-          </div>
-          <div class="form-field">
-            <label for="userRole">Role *</label>
-            <select id="userRole" required>
-              <option value="user">User (Staff)</option>
-              <option value="admin">Admin (Full Access)</option>
-            </select>
-          </div>
-          <div id="userMessage" style="margin-top: 10px; font-size: 0.9rem;"></div>
-          <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="submit" class="btn" style="background: #10b981;" id="btnSaveUser">Save User</button>
-            <button type="button" class="btn" style="background: #6b7280;" id="cancelUserForm">Cancel</button>
           </div>
         </form>
       </div>
