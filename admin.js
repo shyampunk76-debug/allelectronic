@@ -1274,7 +1274,9 @@ function renderUsersTable(users) {
 }
 
 // Add new user
-btnAddUser?.addEventListener('click', () => {
+btnAddUser?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   userModalTitle.textContent = '➕ Add New User';
   document.getElementById('editUserId').value = '';
   document.getElementById('userUsername').disabled = false;

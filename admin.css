@@ -29,7 +29,7 @@ textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius
 .btn-delete:hover { background:#b91c1c; }
 .btn-export { background:#10b981; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; font-size:14px; }
 .btn-export:hover { background:#059669; }
-.hidden { display:none }
+.hidden { display:none !important; }
 
 /* Manual Entry Section */
 .manual-entry-section { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:20px; }
