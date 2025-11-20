@@ -921,12 +921,12 @@ function exportToExcel(data) {
   
   // Merge cells for title
   ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } }
   ];
   
   // Add styling to header row (row 5, index 4)
   const headerRow = 4;
-  ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].forEach(col => {
+  ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach(col => {
     const cellRef = col + (headerRow + 1);
     if (ws[cellRef]) {
       ws[cellRef].s = {
