@@ -859,8 +859,9 @@ function getSelectedRequestsData() {
       name: row.querySelector('td:nth-child(4)')?.textContent || '',
       email: row.querySelector('.email-cell')?.textContent || '',
       phone: row.querySelector('.phone-cell')?.textContent || '',
-      product: row.querySelector('td:nth-child(7)')?.textContent || '',
-      issue: row.querySelector('td:nth-child(8)')?.textContent || '',
+      serviceType: row.querySelector('td:nth-child(7)')?.textContent || '',
+      product: row.querySelector('td:nth-child(8)')?.textContent || '',
+      issue: row.querySelector('td:nth-child(9)')?.textContent || '',
       status: row.querySelector('.statusSelect')?.value || '',
       payment: row.querySelector('.paymentSelect')?.value || ''
     };
