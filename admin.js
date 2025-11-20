@@ -241,20 +241,53 @@ adminAddRequestForm.addEventListener('submit', async (e) => {
     return;
   }
   
+  // Submit with duplicate check first
+  await submitManualEntry(formData, false);
+});
+
+// Function to handle manual entry submission with duplicate detection
+async function submitManualEntry(formData, forceDuplicate = false) {
   manualEntryMessage.textContent = '⏳ Adding request...';
   manualEntryMessage.className = '';
   
   try {
+    const submitData = forceDuplicate ? { ...formData, forceDuplicate: true } : formData;
+    
     const response = await fetch(`${API_BASE}/api/repair-request`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${authToken}`
       },
-      body: JSON.stringify({ ...formData, forceDuplicate: true }) // Allow duplicates for phone orders
+      body: JSON.stringify(submitData)
     });
     
     const result = await response.json();
+    
+    // Handle duplicate detection (409 status)
+    if (response.status === 409 && result.duplicate) {
+      manualEntryMessage.textContent = '';
+      manualEntryMessage.className = '';
+      
+      // Show duplicate confirmation dialog
+      showDuplicateConfirmDialog(
+        result.duplicate,
+        () => {
+          // User chose to submit anyway (new problem)
+          submitManualEntry(formData, true);
+        },
+        () => {
+          // User canceled submission
+          manualEntryMessage.textContent = '❌ Submission canceled - duplicate request detected';
+          manualEntryMessage.className = 'error';
+          setTimeout(() => {
+            manualEntryMessage.textContent = '';
+            manualEntryMessage.className = '';
+          }, 3000);
+        }
+      );
+      return;
+    }
     
     if (response.ok && result.status === 'success') {
       manualEntryMessage.textContent = `✅ Request added successfully! ID: ${result.submissionId}`;
@@ -276,7 +309,140 @@ adminAddRequestForm.addEventListener('submit', async (e) => {
     manualEntryMessage.className = 'error';
     console.error('Manual entry error:', err);
   }
-});
+}
+
+// Duplicate confirmation dialog (reusable)
+function showDuplicateConfirmDialog(duplicateInfo, onAllow, onCancel) {
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+  `;
+
+  // Create modal content
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  `;
+
+  const submittedDate = duplicateInfo.createdAt ? new Date(duplicateInfo.createdAt).toLocaleDateString() : 'recently';
+
+  modal.innerHTML = `
+    <div style="margin-bottom: 20px;">
+      <h2 style="color: #1a1a2e; margin: 0 0 15px 0; font-size: 1.5rem;">
+        ⚠️ Duplicate Repair Request Detected
+      </h2>
+      <p style="color: #666; line-height: 1.6; margin: 0 0 15px 0;">
+        A repair request already exists for this customer and product:
+      </p>
+      <p style="
+        background: #f0f0f0;
+        padding: 12px;
+        border-left: 4px solid #667eea;
+        margin: 0 0 15px 0;
+        border-radius: 4px;
+        font-weight: 600;
+        color: #1a1a2e;
+      ">
+        📦 ${escapeHtml(duplicateInfo.product)}
+      </p>
+      <p style="color: #666; line-height: 1.6; margin: 0 0 10px 0;">
+        <strong>Request ID:</strong> ${escapeHtml(duplicateInfo.id)}<br>
+        <strong>Customer:</strong> ${escapeHtml(duplicateInfo.name)}<br>
+        <strong>Status:</strong> ${escapeHtml(duplicateInfo.status)}<br>
+        <strong>Submitted:</strong> ${submittedDate}
+      </p>
+      <p style="color: #666; line-height: 1.6; margin: 0;">
+        Is this a new problem with the same product, or a duplicate entry?
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button id="cancelDuplicateBtn" style="
+        padding: 10px 20px;
+        background: #e5e7eb;
+        color: #374151;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+      ">
+        Cancel - Duplicate
+      </button>
+      <button id="continueDuplicateBtn" style="
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+      ">
+        Continue - New Problem
+      </button>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // Add button handlers
+  document.getElementById('continueDuplicateBtn').onclick = () => {
+    overlay.remove();
+    onAllow();
+  };
+
+  document.getElementById('cancelDuplicateBtn').onclick = () => {
+    overlay.remove();
+    onCancel();
+  };
+
+  // Close on overlay click
+  overlay.onclick = (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+      onCancel();
+    }
+  };
+
+  // Close on Escape key
+  const escapeHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      onCancel();
+      document.removeEventListener('keydown', escapeHandler);
+    }
+  };
+  document.addEventListener('keydown', escapeHandler);
+}
+
+// Escape HTML helper
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
 
 // Items per page dropdown handler
 const itemsPerPageSelect = document.getElementById('itemsPerPage');
