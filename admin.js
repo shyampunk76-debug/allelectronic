@@ -881,11 +881,11 @@ function exportToExcel(data) {
   requestAnimationFrame(() => {
     // Prepare data for Excel
     const worksheet_data = [
-      ['Repair Requests Export', '', '', '', '', '', '', ''],
-      ['Generated on:', new Date().toLocaleString(), '', '', '', '', '', ''],
-      ['Total Records:', data.length, '', '', '', '', '', ''],
+      ['Repair Requests Export', '', '', '', '', '', '', '', ''],
+      ['Generated on:', new Date().toLocaleString(), '', '', '', '', '', '', ''],
+      ['Total Records:', data.length, '', '', '', '', '', '', ''],
       [],
-      ['ID', 'Name', 'Email', 'Phone', 'Product', 'Issue', 'Status', 'Payment']
+      ['ID', 'Name', 'Email', 'Phone', 'Service Category', 'Product', 'Issue', 'Status', 'Payment']
     ];
     
     data.forEach(item => {
@@ -894,6 +894,7 @@ function exportToExcel(data) {
         item.name,
         item.email,
         item.phone,
+        item.serviceType || '-',
         item.product,
         item.issue,
         item.status,
@@ -911,6 +912,7 @@ function exportToExcel(data) {
     { wch: 15 }, // Name
     { wch: 25 }, // Email
     { wch: 15 }, // Phone
+    { wch: 18 }, // Service Category
     { wch: 20 }, // Product
     { wch: 40 }, // Issue
     { wch: 12 }, // Status
@@ -978,6 +980,7 @@ function exportToPDF(data) {
     item.name,
     item.email,
     item.phone,
+    item.serviceType || '-',
     item.product,
     item.issue.substring(0, 50) + (item.issue.length > 50 ? '...' : ''), // Truncate long issues
     item.status,
@@ -986,7 +989,7 @@ function exportToPDF(data) {
   
   // Add table
   doc.autoTable({
-    head: [['ID', 'Name', 'Email', 'Phone', 'Product', 'Issue', 'Status', 'Payment']],
+    head: [['ID', 'Name', 'Email', 'Phone', 'Service Cat.', 'Product', 'Issue', 'Status', 'Payment']],
     body: tableData,
     startY: 40,
     styles: {
@@ -1002,14 +1005,15 @@ function exportToPDF(data) {
       halign: 'center'
     },
     columnStyles: {
-      0: { cellWidth: 28 }, // ID
-      1: { cellWidth: 25 }, // Name
-      2: { cellWidth: 35 }, // Email
-      3: { cellWidth: 25 }, // Phone
-      4: { cellWidth: 30 }, // Product
-      5: { cellWidth: 60 }, // Issue
-      6: { cellWidth: 22 }, // Status
-      7: { cellWidth: 25 }  // Payment
+      0: { cellWidth: 26 }, // ID
+      1: { cellWidth: 22 }, // Name
+      2: { cellWidth: 32 }, // Email
+      3: { cellWidth: 22 }, // Phone
+      4: { cellWidth: 20 }, // Service Category
+      5: { cellWidth: 26 }, // Product
+      6: { cellWidth: 50 }, // Issue
+      7: { cellWidth: 20 }, // Status
+      8: { cellWidth: 22 }  // Payment
     },
     alternateRowStyles: {
       fillColor: [245, 247, 250]
