@@ -64,49 +64,86 @@
     <section id="form" class="form-section">
         <div class="container">
             <h2>Request a Repair</h2>
+            <p class="form-subtitle">Fill out the form below and we'll get back to you within 24 hours</p>
+            
             <form id="repairForm" class="repair-form">
-                <div class="form-group">
-                    <label for="name">Full Name *</label>
-                    <input type="text" id="name" name="name" required>
-                    <span class="error-message" id="nameError"></span>
+                <div class="form-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">0% Complete</span>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="email" required>
-                    <span class="error-message" id="emailError"></span>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">
+                            <span class="label-icon">👤</span>
+                            Full Name *
+                        </label>
+                        <input type="text" id="name" name="name" placeholder="John Doe" required autocomplete="name">
+                        <span class="error-message" id="nameError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <span class="label-icon">📧</span>
+                            Email Address *
+                        </label>
+                        <input type="email" id="email" name="email" placeholder="john@example.com" required autocomplete="email">
+                        <span class="error-message" id="emailError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            <span class="label-icon">📱</span>
+                            Phone Number *
+                        </label>
+                        <input type="tel" id="phone" name="phone" placeholder="+977 or (555) 123-4567" required autocomplete="tel">
+                        <span class="error-message" id="phoneError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="serviceType">
+                            <span class="label-icon">🔧</span>
+                            Service Category
+                        </label>
+                        <select id="serviceType" name="serviceType">
+                            <option value="">Select a category</option>
+                            <option value="Kitchen Appliances">🍳 Kitchen Appliances</option>
+                            <option value="Washing Machines">👔 Washing Machines</option>
+                            <option value="HVAC Systems">❄️ HVAC Systems</option>
+                            <option value="Electronics">📺 Electronics</option>
+                            <option value="Other">⚙️ Other</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="phone">Phone Number *</label>
-                    <input type="tel" id="phone" name="phone" placeholder="e.g., +9779807307274 or (555) 123-4567" required>
-                    <span class="error-message" id="phoneError"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="product">Product Name *</label>
-                    <input type="text" id="product" name="product" placeholder="e.g., Samsung Refrigerator, LG Washing Machine" required>
+                <div class="form-group form-group-full">
+                    <label for="product">
+                        <span class="label-icon">📦</span>
+                        Product/Appliance Name *
+                    </label>
+                    <input type="text" id="product" name="product" placeholder="e.g., Samsung French Door Refrigerator Model RF28" required>
                     <span class="error-message" id="productError"></span>
                 </div>
 
-                <div class="form-group">
-                    <label for="issue">What's Wrong? *</label>
-                    <textarea id="issue" name="issue" rows="5" placeholder="Describe the problem in detail..." required></textarea>
+                <div class="form-group form-group-full">
+                    <label for="issue">
+                        <span class="label-icon">📝</span>
+                        Describe the Problem *
+                        <span class="char-counter" id="issueCounter">0 / 500</span>
+                    </label>
+                    <textarea id="issue" name="issue" rows="6" maxlength="500" placeholder="Please describe the issue in detail. For example: 'Refrigerator not cooling properly. Compressor makes loud noise. Started 2 days ago...'" required></textarea>
                     <span class="error-message" id="issueError"></span>
                 </div>
 
-                <div class="form-group">
-                    <label for="serviceType">Type of Service</label>
-                    <select id="serviceType" name="serviceType">
-                        <option value="">Select a category</option>
-                        <option value="Kitchen Appliances">Kitchen Appliances</option>
-                        <option value="Washing Machines">Washing Machines</option>
-                        <option value="HVAC Systems">HVAC Systems</option>
-                        <option value="Electronics">Electronics</option>
-                    </select>
+                <div class="form-footer">
+                    <button type="submit" class="btn btn-primary btn-submit">
+                        <span class="btn-text">Submit Repair Request</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                    <p class="form-note">💡 Tip: The more details you provide, the faster we can help!</p>
                 </div>
-
-                <button type="submit" class="btn btn-primary btn-submit">Submit Repair Request</button>
                 <span class="form-message" id="formMessage"></span>
             </form>
         </div>

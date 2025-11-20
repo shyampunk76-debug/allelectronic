@@ -115,13 +115,45 @@ a:hover {
 
 .btn-submit {
     width: 100%;
-    padding: 1rem;
+    padding: 1.1rem 2rem;
     font-size: 1.1rem;
-    background-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-submit:hover {
-    background-color: #764ba2;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    font-size: 1.3rem;
+    transition: transform 0.3s;
+}
+
+.btn-submit:hover .btn-icon {
+    transform: translateX(5px);
+}
+
+.form-footer {
+    margin-top: 2rem;
+}
+
+.form-note {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-style: italic;
 }
 
 /* Services Section */
@@ -176,17 +208,68 @@ a:hover {
 .form-section h2 {
     text-align: center;
     font-size: 2.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
     color: #1a1a2e;
+}
+
+.form-subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 2rem;
 }
 
 .repair-form {
     background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    max-width: 900px;
     margin: 0 auto;
+    position: relative;
+}
+
+/* Form Progress Bar */
+.form-progress {
+    margin-bottom: 2rem;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    width: 0;
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* Form Grid Layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group-full {
+    grid-column: 1 / -1;
 }
 
 .form-group {
@@ -194,22 +277,37 @@ a:hover {
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
     font-weight: 600;
     color: #1a1a2e;
+    font-size: 0.95rem;
+}
+
+.label-icon {
+    margin-right: 0.4rem;
+    font-size: 1.1rem;
+}
+
+.char-counter {
+    font-size: 0.8rem;
+    color: #999;
+    font-weight: 400;
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
     width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
     font-family: inherit;
     font-size: 1rem;
-    transition: border-color 0.3s;
+    transition: all 0.3s ease;
+    background: #fafafa;
 }
 
 .form-group input:focus,
@@ -217,11 +315,28 @@ a:hover {
 .form-group select:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    background: white;
+    transform: translateY(-1px);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #adb5bd;
 }
 
 .form-group textarea {
     resize: vertical;
+    line-height: 1.6;
+}
+
+.form-group select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
 }
 
 .error-message {
@@ -338,13 +453,27 @@ a:hover {
         font-size: 1.8rem;
     }
 
+    .form-subtitle {
+        font-size: 1rem;
+    }
+
     .repair-form {
         padding: 1.5rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .services-grid,
     .contact-info {
         grid-template-columns: 1fr;
+    }
+
+    .btn-submit {
+        padding: 1rem;
+        font-size: 1rem;
     }
 }
 

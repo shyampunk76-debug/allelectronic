@@ -153,6 +153,55 @@ function escapeHtml(text) {
 // Form validation and submission
 const repairForm = document.getElementById('repairForm');
 
+// Progress bar functionality
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const requiredFields = ['name', 'email', 'phone', 'product', 'issue'];
+
+function updateProgress() {
+    let filledFields = 0;
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && field.value.trim() !== '') {
+            filledFields++;
+        }
+    });
+    
+    const progress = Math.round((filledFields / requiredFields.length) * 100);
+    progressFill.style.width = progress + '%';
+    progressText.textContent = progress + '% Complete';
+}
+
+// Character counter for issue field
+const issueField = document.getElementById('issue');
+const issueCounter = document.getElementById('issueCounter');
+
+if (issueField && issueCounter) {
+    issueField.addEventListener('input', function() {
+        const length = this.value.length;
+        const maxLength = this.getAttribute('maxlength') || 500;
+        issueCounter.textContent = `${length} / ${maxLength}`;
+        
+        // Change color when approaching limit
+        if (length > maxLength * 0.9) {
+            issueCounter.style.color = '#e74c3c';
+        } else if (length > maxLength * 0.7) {
+            issueCounter.style.color = '#f39c12';
+        } else {
+            issueCounter.style.color = '#999';
+        }
+    });
+}
+
+// Update progress on field changes
+requiredFields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        field.addEventListener('input', updateProgress);
+        field.addEventListener('blur', updateProgress);
+    }
+});
+
 // Validation rules
 const validators = {
     name: {
