@@ -55,6 +55,17 @@
               <input type="tel" id="manualPhone" placeholder="+977 or (555) 123-4567" required>
             </div>
             <div class="form-field">
+              <label for="manualServiceType">Service Category</label>
+              <select id="manualServiceType">
+                <option value="">Select a category</option>
+                <option value="Kitchen Appliances">🍳 Kitchen Appliances</option>
+                <option value="Washing Machines">👔 Washing Machines</option>
+                <option value="HVAC Systems">❄️ HVAC Systems</option>
+                <option value="Electronics">📺 Electronics</option>
+                <option value="Other">⚙️ Other</option>
+              </select>
+            </div>
+            <div class="form-field">
               <label for="manualProduct">Product *</label>
               <input type="text" id="manualProduct" placeholder="Samsung Refrigerator" required>
             </div>
@@ -124,6 +135,7 @@
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
+              <th>Service Category</th>
               <th>Product</th>
               <th>Issue</th>
               <th>Status</th>

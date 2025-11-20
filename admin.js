@@ -81,6 +81,7 @@ function renderRow(r, index) {
     <td>${r.name}</td>
     <td class="email-cell">${r.email || ''}</td>
     <td class="phone-cell">${formatPhone(r.phone)}</td>
+    <td style="font-size: 0.85rem;">${r.serviceType || '-'}</td>
     <td>${r.product}</td>
     <td>${r.issue}</td>
     <td>
@@ -203,6 +204,7 @@ adminAddRequestForm.addEventListener('submit', async (e) => {
     name: document.getElementById('manualName').value.trim(),
     email: document.getElementById('manualEmail').value.trim(),
     phone: document.getElementById('manualPhone').value.trim(),
+    serviceType: document.getElementById('manualServiceType').value,
     product: document.getElementById('manualProduct').value.trim(),
     issue: document.getElementById('manualIssue').value.trim(),
     status: document.getElementById('manualStatus').value,
