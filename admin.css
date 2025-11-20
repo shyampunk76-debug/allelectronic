@@ -8,12 +8,28 @@ body { font-family: Arial, sans-serif; background:#f7fafc; color:#111827; margin
 .logout-btn:hover { background:#dc2626; }
 label { display:block; margin-bottom:8px }
 input { width:100%; padding:8px 10px; margin-top:6px; border:1px solid #e5e7eb; border-radius:6px }
+textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:Arial, sans-serif; resize:vertical; }
 .btn { background:#667eea; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer }
+.btn:hover { background:#5568d3; }
+.btn-toggle { background:#6b7280; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
+.btn-toggle:hover { background:#4b5563; }
 .btn-delete { background:#dc2626; color:white; }
 .btn-delete:hover { background:#b91c1c; }
 .btn-export { background:#10b981; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; font-size:14px; }
 .btn-export:hover { background:#059669; }
 .hidden { display:none }
+
+/* Manual Entry Section */
+.manual-entry-section { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:20px; }
+.manual-entry-form { margin-top:15px; }
+.form-field { display:flex; flex-direction:column; }
+.form-field label { font-size:14px; font-weight:600; color:#374151; margin-bottom:6px; }
+.form-field input, .form-field textarea, .form-field select { padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; }
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus { outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,0.1); }
+#manualEntryMessage { font-weight:500; }
+#manualEntryMessage.success { color:#059669; }
+#manualEntryMessage.error { color:#dc2626; }
+
 .controls { display:flex; gap:8px; margin:12px 0; align-items:center; flex-wrap:wrap }
 
 /* Export controls */

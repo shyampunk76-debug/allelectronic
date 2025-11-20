@@ -73,7 +73,6 @@ function renderRow(r, index) {
       </select>
     </td>
     <td>
-      <button class="actionBtn btnView" data-id="${r.id}">View</button>
       <button class="actionBtn btnSave" data-id="${r.id}">Save</button>
     </td>
   `;
@@ -158,6 +157,126 @@ adminLoginForm.addEventListener('submit', async (e) => {
 
 btnRefresh.addEventListener('click', loadRequests);
 btnLogout.addEventListener('click', logout);
+
+// Manual entry form handlers
+const btnToggleManualEntry = document.getElementById('btnToggleManualEntry');
+const manualEntryForm = document.getElementById('manualEntryForm');
+const adminAddRequestForm = document.getElementById('adminAddRequestForm');
+const btnClearManualForm = document.getElementById('btnClearManualForm');
+const manualEntryMessage = document.getElementById('manualEntryMessage');
+
+// Toggle manual entry form visibility
+btnToggleManualEntry.addEventListener('click', () => {
+  const isHidden = manualEntryForm.classList.contains('hidden');
+  if (isHidden) {
+    manualEntryForm.classList.remove('hidden');
+    btnToggleManualEntry.textContent = '➖ Hide Form';
+  } else {
+    manualEntryForm.classList.add('hidden');
+    btnToggleManualEntry.textContent = '➕ Show Form';
+  }
+});
+
+// Clear manual entry form
+btnClearManualForm.addEventListener('click', () => {
+  adminAddRequestForm.reset();
+  manualEntryMessage.textContent = '';
+  manualEntryMessage.className = '';
+});
+
+// Phone formatting for manual entry
+const manualPhoneInput = document.getElementById('manualPhone');
+if (manualPhoneInput) {
+  manualPhoneInput.addEventListener('input', function(e) {
+    let value = e.target.value;
+    const hasPlus = value.startsWith('+');
+    let digitsOnly = value.replace(/\D/g, '');
+    
+    if (digitsOnly.length > 15) {
+      digitsOnly = digitsOnly.slice(0, 15);
+    }
+    
+    if (digitsOnly.length === 0) {
+      value = '';
+    } else if (hasPlus) {
+      if (digitsOnly.length <= 3) {
+        value = '+' + digitsOnly;
+      } else if (digitsOnly.length <= 6) {
+        value = '+' + digitsOnly.slice(0, 3) + '-' + digitsOnly.slice(3);
+      } else {
+        value = '+' + digitsOnly.slice(0, 3) + '-' + digitsOnly.slice(3, 6) + '-' + digitsOnly.slice(6);
+      }
+    } else {
+      if (digitsOnly.length <= 3) {
+        value = digitsOnly;
+      } else if (digitsOnly.length <= 6) {
+        value = `(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3)}`;
+      } else {
+        value = `(${digitsOnly.slice(0, 3)}) ${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`;
+      }
+    }
+    
+    e.target.value = value;
+  });
+}
+
+// Handle manual entry form submission
+adminAddRequestForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const formData = {
+    name: document.getElementById('manualName').value.trim(),
+    email: document.getElementById('manualEmail').value.trim(),
+    phone: document.getElementById('manualPhone').value.trim(),
+    product: document.getElementById('manualProduct').value.trim(),
+    issue: document.getElementById('manualIssue').value.trim(),
+    status: document.getElementById('manualStatus').value,
+    payment: document.getElementById('manualPayment').value
+  };
+  
+  // Basic validation
+  if (!formData.name || !formData.phone || !formData.product || !formData.issue) {
+    manualEntryMessage.textContent = '❌ Please fill all required fields';
+    manualEntryMessage.className = 'error';
+    return;
+  }
+  
+  manualEntryMessage.textContent = '⏳ Adding request...';
+  manualEntryMessage.className = '';
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/repair-request`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ ...formData, forceDuplicate: true }) // Allow duplicates for phone orders
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok && result.status === 'success') {
+      manualEntryMessage.textContent = `✅ Request added successfully! ID: ${result.submissionId}`;
+      manualEntryMessage.className = 'success';
+      adminAddRequestForm.reset();
+      
+      // Refresh the table to show the new entry
+      setTimeout(async () => {
+        await loadRequests();
+        manualEntryMessage.textContent = '';
+        manualEntryMessage.className = '';
+      }, 2000);
+    } else {
+      manualEntryMessage.textContent = `❌ Error: ${result.message || 'Failed to add request'}`;
+      manualEntryMessage.className = 'error';
+    }
+  } catch (err) {
+    manualEntryMessage.textContent = `❌ Error: ${err.message}`;
+    manualEntryMessage.className = 'error';
+    console.error('Manual entry error:', err);
+  }
+});
 
 // Items per page dropdown handler
 const itemsPerPageSelect = document.getElementById('itemsPerPage');
@@ -251,10 +370,6 @@ function updatePaginationUI() {
 }
 
 function attachRowHandlers() {
-  document.querySelectorAll('.btnView').forEach(btn => {
-    btn.onclick = () => alert('Full record:\n' + JSON.stringify(findById(btn.dataset.id), null, 2));
-  });
-
   document.querySelectorAll('.btnSave').forEach(btn => {
     btn.onclick = async () => {
       const id = btn.dataset.id;
@@ -326,17 +441,6 @@ function attachRowHandlers() {
       }
     });
   });
-}
-
-function findById(id) {
-  const row = requestsTableBody.querySelector(`tr[data-id="${id}"]`);
-  if (!row) return null;
-  return {
-    id: row.dataset.id,
-    name: row.children[1] ? row.children[1].textContent : '',
-    email: row.querySelector('.email-cell') ? row.querySelector('.email-cell').textContent : '',
-    phone: row.querySelector('.phone-cell') ? row.querySelector('.phone-cell').textContent : ''
-  };
 }
 
 // Decode JWT token to verify role (basic client-side check)

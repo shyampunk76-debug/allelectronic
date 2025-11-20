@@ -30,6 +30,61 @@
         <button id="btnLogout" class="logout-btn">🔓 Logout</button>
       </div>
 
+      <!-- Manual Entry Form -->
+      <div class="manual-entry-section">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0; font-size: 1.1rem;">📝 Manual Entry (Phone Orders)</h3>
+          <button id="btnToggleManualEntry" class="btn-toggle" style="padding: 6px 12px; font-size: 0.9rem;">➕ Show Form</button>
+        </div>
+        
+        <div id="manualEntryForm" class="manual-entry-form hidden">
+          <form id="adminAddRequestForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            <div class="form-field">
+              <label for="manualName">Customer Name *</label>
+              <input type="text" id="manualName" placeholder="Full name" required>
+            </div>
+            <div class="form-field">
+              <label for="manualEmail">Email</label>
+              <input type="email" id="manualEmail" placeholder="email@example.com">
+            </div>
+            <div class="form-field">
+              <label for="manualPhone">Phone Number *</label>
+              <input type="tel" id="manualPhone" placeholder="+977 or (555) 123-4567" required>
+            </div>
+            <div class="form-field">
+              <label for="manualProduct">Product *</label>
+              <input type="text" id="manualProduct" placeholder="Samsung Refrigerator" required>
+            </div>
+            <div class="form-field" style="grid-column: 1 / -1;">
+              <label for="manualIssue">Issue Description *</label>
+              <textarea id="manualIssue" rows="3" placeholder="Describe the problem..." required></textarea>
+            </div>
+            <div class="form-field">
+              <label for="manualStatus">Initial Status</label>
+              <select id="manualStatus">
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="manualPayment">Payment Status</label>
+              <select id="manualPayment">
+                <option value="payment-pending">Payment Pending</option>
+                <option value="processing">Processing</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+            <div class="form-field" style="grid-column: 1 / -1; display: flex; gap: 10px; align-items: center;">
+              <button type="submit" class="btn" style="background: #667eea; padding: 10px 20px;">💾 Add Request</button>
+              <button type="button" id="btnClearManualForm" class="btn" style="background: #6b7280; padding: 10px 20px;">🔄 Clear</button>
+              <span id="manualEntryMessage" style="margin-left: 10px; font-size: 0.9rem;"></span>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <div class="controls">
         <input id="searchId" placeholder="Search anything (ID, name, email, phone, product, issue, status...)" style="flex: 1; min-width: 300px;" />
         <button id="btnSearch">Search</button>
