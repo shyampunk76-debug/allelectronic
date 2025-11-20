@@ -1100,11 +1100,25 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     
     if (targetTab === 'requests') {
       document.getElementById('tabRequests').classList.add('active');
-    } else if (targetTab === 'user-management') {
-      document.getElementById('tabUserManagement').classList.add('active');
-      loadUsers(); // Load users when tab is opened
     }
   });
+});
+
+// ========================================
+// USER MANAGEMENT MODAL
+// ========================================
+
+const btnManageUsers = document.getElementById('btnManageUsers');
+const userManagementModal = document.getElementById('userManagementModal');
+const closeUserManagementModal = document.getElementById('closeUserManagementModal');
+
+btnManageUsers?.addEventListener('click', () => {
+  userManagementModal.classList.remove('hidden');
+  loadUsers(); // Load users when modal opens
+});
+
+closeUserManagementModal?.addEventListener('click', () => {
+  userManagementModal.classList.add('hidden');
 });
 
 // ========================================
@@ -1186,7 +1200,7 @@ changePasswordForm?.addEventListener('submit', async (e) => {
 // USER MANAGEMENT
 // ========================================
 
-const btnUserManagement = document.getElementById('btnUserManagement');
+const btnUserManagement = document.getElementById('btnManageUsers');
 const tabUserManagement = document.getElementById('tabUserManagement');
 const usersTableBody = document.querySelector('#usersTable tbody');
 const btnAddUser = document.getElementById('btnAddUser');
@@ -1197,14 +1211,12 @@ const cancelUserForm = document.getElementById('cancelUserForm');
 const userMessage = document.getElementById('userMessage');
 const userModalTitle = document.getElementById('userModalTitle');
 
-// Show user management tab only for admins
+// Show user management button only for admins
 function updateUIForRole() {
   if (currentUserRole === 'admin') {
     btnUserManagement?.classList.remove('hidden');
-    tabUserManagement?.style.setProperty('display', 'block');
   } else {
     btnUserManagement?.classList.add('hidden');
-    tabUserManagement?.style.setProperty('display', 'none');
   }
 }
 
@@ -1437,6 +1449,9 @@ window.addEventListener('click', (e) => {
   }
   if (e.target === userModal) {
     userModal.classList.add('hidden');
+  }
+  if (e.target === userManagementModal) {
+    userManagementModal.classList.add('hidden');
   }
 });
 

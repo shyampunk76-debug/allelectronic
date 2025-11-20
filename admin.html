@@ -28,7 +28,7 @@
           <div id="userRoleInfo" style="font-size: 14px; color: #6b7280; margin-top: 4px;"></div>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="btnUserManagement" class="btn-user-mgmt hidden" title="User Management">👥 Users</button>
+          <button id="btnManageUsers" class="btn-user-mgmt hidden" title="Manage Users">👥 Manage Users</button>
           <button id="btnChangePassword" class="btn-password" title="Change Password">🔑 Change Password</button>
           <button id="btnLogout" class="logout-btn">🔓 Logout</button>
         </div>
@@ -37,7 +37,6 @@
       <!-- Tab Navigation -->
       <div class="tab-navigation">
         <button class="tab-btn active" data-tab="requests">📋 Repair Requests</button>
-        <button class="tab-btn" id="tabUserManagement" data-tab="user-management" style="display: none;">👥 User Management</button>
       </div>
 
       <!-- Requests Tab Content -->
@@ -158,27 +157,33 @@
       <!-- End Requests Tab Content -->
     </section>
 
-    <!-- User Management Tab Content -->
-    <div id="tabUserManagement" class="tab-content">
-      <div class="user-management-panel">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3 style="margin: 0;">👥 User Management</h3>
-          <button id="btnAddUser" class="btn" style="background: #10b981; padding: 8px 16px;">➕ Add New User</button>
+    <!-- User Management Modal -->
+    <div id="userManagementModal" class="modal hidden">
+      <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+          <h3>👥 User Management</h3>
+          <button class="modal-close" id="closeUserManagementModal">×</button>
         </div>
+        <div class="user-management-panel">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <p style="margin: 0; color: #6b7280;">Manage staff users and administrators</p>
+            <button id="btnAddUser" class="btn" style="background: #10b981; padding: 8px 16px;">➕ Add New User</button>
+          </div>
 
-        <div id="usersTableContainer" class="table-container">
-          <table id="usersTable">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Created</th>
-                <th>Last Modified</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+          <div id="usersTableContainer" class="table-container">
+            <table id="usersTable">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Created</th>
+                  <th>Last Modified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
