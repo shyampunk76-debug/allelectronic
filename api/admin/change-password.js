@@ -1,11 +1,12 @@
 // Change Password API - Allow users to change their own password
-import clientPromise from '../../db.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const connectDB = require('../../db');
+const AdminUser = require('../../models/AdminUser');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'ae-admin-secret-change-this';
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -20,6 +21,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Connect to database
+    await connectDB();
+
     // Verify token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -48,12 +52,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'New password must be different from current password' });
     }
 
-    const client = await clientPromise;
-    const db = client.db('allelectronic');
-    const usersCollection = db.collection('admin_users');
-
-    // Find user
-    const user = await usersCollection.findOne({ username: decoded.username });
+    // Find user using Mongoose
+    const user = await AdminUser.findOne({ username: decoded.username });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -68,16 +68,10 @@ export default async function handler(req, res) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update password
-    await usersCollection.updateOne(
-      { username: decoded.username },
-      { 
-        $set: { 
-          password: hashedPassword,
-          lastPasswordChange: new Date(),
-          lastModified: new Date()
-        } 
-      }
-    );
+    user.password = hashedPassword;
+    user.lastPasswordChange = new Date();
+    user.lastModified = new Date();
+    await user.save();
 
     return res.status(200).json({
       success: true,
@@ -91,4 +85,4 @@ export default async function handler(req, res) {
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
-}
+};

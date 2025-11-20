@@ -1,11 +1,12 @@
 // User Management API - Add, Update, Delete staff users
-import clientPromise from '../../db.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const connectDB = require('../../db');
+const AdminUser = require('../../models/AdminUser');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'ae-admin-secret-change-this';
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
@@ -16,6 +17,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Connect to database
+    await connectDB();
+
     // Verify admin token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -35,16 +39,12 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Forbidden - Admin access required' });
     }
 
-    const client = await clientPromise;
-    const db = client.db('allelectronic');
-    const usersCollection = db.collection('admin_users');
-
     // GET - List all users (admin can see all)
     if (req.method === 'GET') {
-      const users = await usersCollection
-        .find({}, { projection: { password: 0 } })
-        .sort({ role: 1, username: 1 })
-        .toArray();
+      const users = await AdminUser
+        .find({})
+        .select('-password')
+        .sort({ role: 1, username: 1 });
       
       return res.status(200).json({ 
         success: true, 
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
       const userRole = role && validRoles.includes(role) ? role : 'user';
 
       // Check if username already exists
-      const existingUser = await usersCollection.findOne({ username });
+      const existingUser = await AdminUser.findOne({ username });
       if (existingUser) {
         return res.status(409).json({ error: 'Username already exists' });
       }
@@ -80,24 +80,22 @@ export default async function handler(req, res) {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Create user
-      const newUser = {
+      const newUser = new AdminUser({
         username,
         password: hashedPassword,
         role: userRole,
-        createdAt: new Date(),
-        createdBy: decoded.username,
-        lastModified: new Date()
-      };
+        createdBy: decoded.username
+      });
 
-      const result = await usersCollection.insertOne(newUser);
+      await newUser.save();
 
       return res.status(201).json({
         success: true,
         message: `${userRole === 'admin' ? 'Admin' : 'Staff'} user created successfully`,
         user: {
-          id: result.insertedId.toString(),
-          username,
-          role: userRole,
+          id: newUser._id.toString(),
+          username: newUser.username,
+          role: newUser.role,
           createdAt: newUser.createdAt
         }
       });
@@ -115,39 +113,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Either newPassword or newRole must be provided' });
       }
 
-      const { ObjectId } = await import('mongodb');
-      let objectId;
-      try {
-        objectId = new ObjectId(userId);
-      } catch (err) {
-        return res.status(400).json({ error: 'Invalid user ID format' });
-      }
-
       // Check if user exists
-      const user = await usersCollection.findOne({ _id: objectId });
+      const user = await AdminUser.findById(userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      // Prepare update object
-      const updateObj = {
-        lastModified: new Date(),
-        modifiedBy: decoded.username
-      };
-
+      // Update fields
       if (newPassword) {
-        updateObj.password = await bcrypt.hash(newPassword, 10);
+        user.password = await bcrypt.hash(newPassword, 10);
       }
 
       if (newRole && ['admin', 'user'].includes(newRole)) {
-        updateObj.role = newRole;
+        user.role = newRole;
       }
 
-      // Update user
-      await usersCollection.updateOne(
-        { _id: objectId },
-        { $set: updateObj }
-      );
+      user.lastModified = new Date();
+      await user.save();
 
       return res.status(200).json({
         success: true,
@@ -167,16 +149,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'User ID is required' });
       }
 
-      const { ObjectId } = await import('mongodb');
-      let objectId;
-      try {
-        objectId = new ObjectId(userId);
-      } catch (err) {
-        return res.status(400).json({ error: 'Invalid user ID format' });
-      }
-
       // Check if user exists
-      const user = await usersCollection.findOne({ _id: objectId });
+      const user = await AdminUser.findById(userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -187,7 +161,7 @@ export default async function handler(req, res) {
       }
 
       // Delete user
-      await usersCollection.deleteOne({ _id: objectId });
+      await AdminUser.findByIdAndDelete(userId);
 
       return res.status(200).json({
         success: true,
@@ -204,4 +178,4 @@ export default async function handler(req, res) {
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
-}
+};
