@@ -1,5 +1,4 @@
 // Admin front-end script with JWT auth
-const adminLoginForm = document.getElementById('adminLoginForm');
 const adminArea = document.getElementById('adminArea');
 const statusMessage = document.getElementById('statusMessage');
 const requestsTableBody = document.querySelector('#requestsTable tbody');
@@ -22,6 +21,46 @@ let currentPage = 1;
 let totalPages = 1;
 let totalRecords = 0;
 
+// Check if user is logged in on page load
+function checkAuth() {
+  authToken = sessionStorage.getItem('admin_token');
+  currentUserRole = sessionStorage.getItem('admin_role');
+  
+  if (!authToken || !currentUserRole) {
+    // Not logged in, redirect to home page
+    window.location.href = '/index.html';
+    return false;
+  }
+  
+  // Logged in, show admin area
+  adminArea.classList.remove('hidden');
+  
+  // Display user role info
+  const roleInfo = document.getElementById('userRoleInfo');
+  const roleDisplay = currentUserRole === 'admin' ? '👑 Administrator' : '👤 Staff User';
+  const permissions = currentUserRole === 'admin' 
+    ? 'Full access: View, Edit, Delete, Export'
+    : 'Limited access: View, Edit, Export only';
+  roleInfo.innerHTML = `<strong>${roleDisplay}</strong> • ${permissions}`;
+  
+  // Show/hide features based on role
+  if (currentUserRole === 'admin') {
+    btnDeleteSelected.classList.remove('hidden');
+  } else {
+    btnDeleteSelected.classList.add('hidden');
+  }
+  
+  // Update UI for role (user management access)
+  updateUIForRole();
+  
+  return true;
+}
+
+// Initialize on page load
+if (checkAuth()) {
+  loadRequests();
+}
+
 function showStatus(msg, isError = false) {
   statusMessage.textContent = msg;
   statusMessage.style.color = isError ? '#b91c1c' : '#065f46';
@@ -32,13 +71,8 @@ function logout() {
   currentUserRole = null;
   sessionStorage.removeItem('admin_token');
   sessionStorage.removeItem('admin_role');
-  adminArea.classList.add('hidden');
-  document.querySelector('.login').style.display = 'block';
-  clearTable();
-  showStatus('Logged out successfully');
-  // Clear form fields
-  document.getElementById('adminUser').value = '';
-  document.getElementById('adminPass').value = '';
+  // Redirect to repair request page (home page)
+  window.location.href = '/index.html';
 }
 
 function clearTable() { requestsTableBody.innerHTML = ''; }
@@ -103,60 +137,6 @@ async function adminRequest(path, body) {
     return { status: 'error', message: err.message };
   }
 }
-
-adminLoginForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const user = document.getElementById('adminUser').value.trim();
-  const pass = document.getElementById('adminPass').value.trim();
-  if (!user || !pass) return showStatus('Enter credentials', true);
-
-  showStatus('Signing in...');
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: user, password: pass })
-    });
-    const data = await res.json();
-    if (data.status === 'success' && data.user && data.user.role) {
-      authToken = data.token;
-      currentUserRole = data.user.role;
-      sessionStorage.setItem('admin_token', authToken);
-      sessionStorage.setItem('admin_role', currentUserRole);
-      console.log('Login successful - Role:', currentUserRole);
-      showStatus('Signed in');
-      document.querySelector('.login').style.display = 'none';
-      adminArea.classList.remove('hidden');
-      
-      // Display user role info
-      const roleInfo = document.getElementById('userRoleInfo');
-      const roleDisplay = currentUserRole === 'admin' ? '👑 Administrator' : '👤 Staff User';
-      const permissions = currentUserRole === 'admin' 
-        ? 'Full access: View, Edit, Delete, Export'
-        : 'Limited access: View, Edit, Export only';
-      roleInfo.innerHTML = `<strong>${roleDisplay}</strong> • ${permissions}`;
-      
-      // Show/hide delete button based on role
-      if (currentUserRole === 'admin') {
-        btnDeleteSelected.classList.remove('hidden');
-      } else {
-        btnDeleteSelected.classList.add('hidden');
-      }
-      
-      // Update UI for role (user management access)
-      updateUIForRole();
-      
-      await loadRequests();
-    } else if (data.status === 'success' && (!data.user || !data.user.role)) {
-      showStatus('Login error: User role missing from server response', true);
-      console.error('Server response missing user role:', data);
-    } else {
-      showStatus(data.message || 'Sign in failed', true);
-    }
-  } catch (err) {
-    showStatus('Sign in error: ' + err.message, true);
-  }
-});
 
 btnRefresh.addEventListener('click', loadRequests);
 btnLogout.addEventListener('click', logout);
