@@ -1184,10 +1184,17 @@ const userFormTitle = document.getElementById('userFormTitle');
 
 // Show user management button only for admins
 function updateUIForRole() {
+  const pageTitle = document.getElementById('pageTitle');
+  const headerTitle = document.getElementById('headerTitle');
+  
   if (currentUserRole === 'admin') {
     btnManageUsers?.classList.remove('hidden');
+    if (pageTitle) pageTitle.textContent = 'Admin Console';
+    if (headerTitle) headerTitle.textContent = 'Admin Console';
   } else {
     btnManageUsers?.classList.add('hidden');
+    if (pageTitle) pageTitle.textContent = 'User Console';
+    if (headerTitle) headerTitle.textContent = 'User Console';
   }
 }
 
