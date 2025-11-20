@@ -6,6 +6,18 @@ body { font-family: Arial, sans-serif; background:#f7fafc; color:#111827; margin
 .admin-header h2 { margin:0; }
 .logout-btn { background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
 .logout-btn:hover { background:#dc2626; }
+.btn-user-mgmt { background:#8b5cf6; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
+.btn-user-mgmt:hover { background:#7c3aed; }
+.btn-password { background:#3b82f6; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
+.btn-password:hover { background:#2563eb; }
+
+/* Tab Navigation */
+.tab-navigation { display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid #e5e7eb; }
+.tab-btn { background:transparent; border:none; padding:12px 20px; cursor:pointer; font-size:14px; font-weight:500; color:#6b7280; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.2s; }
+.tab-btn:hover { color:#667eea; background:#f9fafb; }
+.tab-btn.active { color:#667eea; border-bottom-color:#667eea; font-weight:600; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
 label { display:block; margin-bottom:8px }
 input { width:100%; padding:8px 10px; margin-top:6px; border:1px solid #e5e7eb; border-radius:6px }
 textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-family:Arial, sans-serif; resize:vertical; }
@@ -107,4 +119,28 @@ tr[data-payment="paid"] { background-color: #d1fae5; } /* Light green */
 /* Ensure text remains readable on colored backgrounds */
 tr[data-status] td, tr[data-payment] td { color: #111827; }
 
+/* Modal Styles */
+.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal-content { background:white; border-radius:8px; padding:24px; max-width:500px; width:90%; box-shadow:0 10px 40px rgba(0,0,0,0.3); animation:slideIn 0.3s ease-out; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #e5e7eb; padding-bottom:12px; }
+.modal-header h3 { margin:0; font-size:1.3rem; color:#111827; }
+.modal-close { background:transparent; border:none; font-size:28px; color:#6b7280; cursor:pointer; padding:0; width:32px; height:32px; line-height:28px; text-align:center; }
+.modal-close:hover { color:#dc2626; }
+
+/* User Management Table */
+#usersTable { width:100%; border-collapse:collapse; margin-top:12px; }
+#usersTable th, #usersTable td { padding:12px; border-bottom:1px solid #e5e7eb; text-align:left; }
+#usersTable th { background:#f8fafc; font-weight:600; color:#374151; }
+#usersTable tbody tr:hover { background:#f9fafb; }
+.role-badge { padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; }
+.role-badge.admin { background:#fecaca; color:#991b1b; }
+.role-badge.user { background:#dbeafe; color:#1e40af; }
+.user-actions { display:flex; gap:8px; }
+.btn-small { padding:6px 12px; border:1px solid #e5e7eb; background:white; border-radius:6px; cursor:pointer; font-size:13px; }
+.btn-small:hover { background:#f3f4f6; border-color:#667eea; }
+.btn-small.danger { color:#dc2626; }
+.btn-small.danger:hover { background:#fee2e2; border-color:#dc2626; }
+
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slideIn { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+

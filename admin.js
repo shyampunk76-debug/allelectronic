@@ -143,6 +143,9 @@ adminLoginForm.addEventListener('submit', async (e) => {
         btnDeleteSelected.classList.add('hidden');
       }
       
+      // Update UI for role (user management access)
+      updateUIForRole();
+      
       await loadRequests();
     } else if (data.status === 'success' && (!data.user || !data.user.role)) {
       showStatus('Login error: User role missing from server response', true);
@@ -1077,3 +1080,363 @@ document.querySelectorAll('.export-option').forEach(btn => {
     });
   });
 });
+
+// ========================================
+// TAB NAVIGATION
+// ========================================
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const targetTab = e.target.dataset.tab;
+    
+    // Update active tab button
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    
+    // Update active tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    
+    if (targetTab === 'requests') {
+      document.getElementById('tabRequests').classList.add('active');
+    } else if (targetTab === 'user-management') {
+      document.getElementById('tabUserManagement').classList.add('active');
+      loadUsers(); // Load users when tab is opened
+    }
+  });
+});
+
+// ========================================
+// CHANGE PASSWORD
+// ========================================
+
+const btnChangePassword = document.getElementById('btnChangePassword');
+const changePasswordModal = document.getElementById('changePasswordModal');
+const changePasswordForm = document.getElementById('changePasswordForm');
+const closePasswordModal = document.getElementById('closePasswordModal');
+const cancelPasswordChange = document.getElementById('cancelPasswordChange');
+const passwordMessage = document.getElementById('passwordMessage');
+
+btnChangePassword?.addEventListener('click', () => {
+  changePasswordModal.classList.remove('hidden');
+  changePasswordForm.reset();
+  passwordMessage.textContent = '';
+});
+
+closePasswordModal?.addEventListener('click', () => {
+  changePasswordModal.classList.add('hidden');
+});
+
+cancelPasswordChange?.addEventListener('click', () => {
+  changePasswordModal.classList.add('hidden');
+});
+
+changePasswordForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const currentPassword = document.getElementById('currentPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  
+  // Validate passwords match
+  if (newPassword !== confirmPassword) {
+    passwordMessage.textContent = '❌ New passwords do not match';
+    passwordMessage.style.color = '#dc2626';
+    return;
+  }
+  
+  if (newPassword.length < 4) {
+    passwordMessage.textContent = '❌ Password must be at least 4 characters';
+    passwordMessage.style.color = '#dc2626';
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/admin/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      passwordMessage.textContent = '✅ ' + data.message;
+      passwordMessage.style.color = '#10b981';
+      changePasswordForm.reset();
+      setTimeout(() => {
+        changePasswordModal.classList.add('hidden');
+      }, 1500);
+    } else {
+      passwordMessage.textContent = '❌ ' + data.error;
+      passwordMessage.style.color = '#dc2626';
+    }
+  } catch (error) {
+    console.error('Change password error:', error);
+    passwordMessage.textContent = '❌ Failed to change password';
+    passwordMessage.style.color = '#dc2626';
+  }
+});
+
+// ========================================
+// USER MANAGEMENT
+// ========================================
+
+const btnUserManagement = document.getElementById('btnUserManagement');
+const tabUserManagement = document.getElementById('tabUserManagement');
+const usersTableBody = document.querySelector('#usersTable tbody');
+const btnAddUser = document.getElementById('btnAddUser');
+const userModal = document.getElementById('userModal');
+const userForm = document.getElementById('userForm');
+const closeUserModal = document.getElementById('closeUserModal');
+const cancelUserForm = document.getElementById('cancelUserForm');
+const userMessage = document.getElementById('userMessage');
+const userModalTitle = document.getElementById('userModalTitle');
+
+// Show user management tab only for admins
+function updateUIForRole() {
+  if (currentUserRole === 'admin') {
+    btnUserManagement?.classList.remove('hidden');
+    tabUserManagement?.style.setProperty('display', 'block');
+  } else {
+    btnUserManagement?.classList.add('hidden');
+    tabUserManagement?.style.setProperty('display', 'none');
+  }
+}
+
+// Load all users
+async function loadUsers() {
+  if (!authToken || currentUserRole !== 'admin') {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/admin/user-management`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.users) {
+      renderUsersTable(data.users);
+    } else {
+      console.error('Failed to load users:', data.error);
+    }
+  } catch (error) {
+    console.error('Error loading users:', error);
+  }
+}
+
+// Render users table
+function renderUsersTable(users) {
+  usersTableBody.innerHTML = '';
+  
+  users.forEach(user => {
+    const tr = document.createElement('tr');
+    const roleBadgeClass = user.role === 'admin' ? 'admin' : 'user';
+    const created = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
+    const modified = user.lastModified ? new Date(user.lastModified).toLocaleDateString() : 'N/A';
+    
+    tr.innerHTML = `
+      <td><strong>${user.username}</strong></td>
+      <td><span class="role-badge ${roleBadgeClass}">${user.role.toUpperCase()}</span></td>
+      <td>${created}</td>
+      <td>${modified}</td>
+      <td>
+        <div class="user-actions">
+          <button class="btn-small" onclick="editUser('${user.id}', '${user.username}', '${user.role}')">✏️ Edit</button>
+          <button class="btn-small" onclick="resetUserPassword('${user.id}', '${user.username}')">🔑 Reset Password</button>
+          <button class="btn-small danger" onclick="deleteUser('${user.id}', '${user.username}')">🗑️ Delete</button>
+        </div>
+      </td>
+    `;
+    
+    usersTableBody.appendChild(tr);
+  });
+}
+
+// Add new user
+btnAddUser?.addEventListener('click', () => {
+  userModalTitle.textContent = '➕ Add New User';
+  document.getElementById('editUserId').value = '';
+  document.getElementById('userUsername').disabled = false;
+  document.getElementById('passwordField').style.display = 'block';
+  document.getElementById('userPassword').required = true;
+  document.getElementById('btnSaveUser').textContent = 'Create User';
+  userForm.reset();
+  userMessage.textContent = '';
+  userModal.classList.remove('hidden');
+});
+
+// Edit user (change role)
+window.editUser = function(userId, username, role) {
+  userModalTitle.textContent = '✏️ Edit User';
+  document.getElementById('editUserId').value = userId;
+  document.getElementById('userUsername').value = username;
+  document.getElementById('userUsername').disabled = true;
+  document.getElementById('userRole').value = role;
+  document.getElementById('passwordField').style.display = 'none';
+  document.getElementById('userPassword').required = false;
+  document.getElementById('btnSaveUser').textContent = 'Update User';
+  userMessage.textContent = '';
+  userModal.classList.remove('hidden');
+};
+
+// Reset user password
+window.resetUserPassword = async function(userId, username) {
+  const newPassword = prompt(`Enter new password for user "${username}":`);
+  
+  if (!newPassword) {
+    return;
+  }
+  
+  if (newPassword.length < 4) {
+    alert('Password must be at least 4 characters long');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/admin/user-management`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ userId, newPassword })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert(`✅ Password updated successfully for ${username}`);
+      loadUsers();
+    } else {
+      alert('❌ ' + data.error);
+    }
+  } catch (error) {
+    console.error('Reset password error:', error);
+    alert('❌ Failed to reset password');
+  }
+};
+
+// Delete user
+window.deleteUser = async function(userId, username) {
+  if (!confirm(`Are you sure you want to delete user "${username}"?\n\nThis action cannot be undone.`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/admin/user-management`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ userId })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert('✅ ' + data.message);
+      loadUsers();
+    } else {
+      alert('❌ ' + data.error);
+    }
+  } catch (error) {
+    console.error('Delete user error:', error);
+    alert('❌ Failed to delete user');
+  }
+};
+
+// Save user (create or update)
+userForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const userId = document.getElementById('editUserId').value;
+  const username = document.getElementById('userUsername').value;
+  const password = document.getElementById('userPassword').value;
+  const role = document.getElementById('userRole').value;
+  
+  try {
+    if (userId) {
+      // Update existing user (role only)
+      const response = await fetch(`${API_BASE}/api/admin/user-management`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ userId, newRole: role })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        userMessage.textContent = '✅ User updated successfully';
+        userMessage.style.color = '#10b981';
+        setTimeout(() => {
+          userModal.classList.add('hidden');
+          loadUsers();
+        }, 1000);
+      } else {
+        userMessage.textContent = '❌ ' + data.error;
+        userMessage.style.color = '#dc2626';
+      }
+    } else {
+      // Create new user
+      const response = await fetch(`${API_BASE}/api/admin/user-management`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ username, password, role })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        userMessage.textContent = '✅ ' + data.message;
+        userMessage.style.color = '#10b981';
+        setTimeout(() => {
+          userModal.classList.add('hidden');
+          loadUsers();
+        }, 1000);
+      } else {
+        userMessage.textContent = '❌ ' + data.error;
+        userMessage.style.color = '#dc2626';
+      }
+    }
+  } catch (error) {
+    console.error('Save user error:', error);
+    userMessage.textContent = '❌ Failed to save user';
+    userMessage.style.color = '#dc2626';
+  }
+});
+
+// Close user modal
+closeUserModal?.addEventListener('click', () => {
+  userModal.classList.add('hidden');
+});
+
+cancelUserForm?.addEventListener('click', () => {
+  userModal.classList.add('hidden');
+});
+
+// Close modals on outside click
+window.addEventListener('click', (e) => {
+  if (e.target === changePasswordModal) {
+    changePasswordModal.classList.add('hidden');
+  }
+  if (e.target === userModal) {
+    userModal.classList.add('hidden');
+  }
+});
+

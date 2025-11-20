@@ -16,12 +16,23 @@ A professional web application for managing home appliance and electronics repai
 - **Responsive Design**: Works seamlessly on mobile, tablet, and desktop
 
 ### Admin Dashboard
-- **Secure Authentication**: Database-driven login system with JWT tokens
+- **Secure Authentication**: Database-driven login system with JWT tokens (8-hour expiration)
+- **Role-Based Access Control**: Admin and Staff user roles with different permissions
 - **Request Management**: View, search, and manage all repair requests
+- **Manual Entry**: Add repair requests manually (for phone orders)
 - **Status Updates**: Update repair status (pending, in-progress, completed, cancelled)
 - **Payment Tracking**: Track payment status (payment-pending, processing, paid)
-- **Search & Filter**: Find requests by ID, customer name, or email
-- **Pagination**: Efficient handling of large request lists
+- **Search & Filter**: Find requests by ID, customer name, email, phone, product, or issue
+- **Pagination**: Efficient handling of large request lists (customizable items per page)
+- **Export Functionality**: Export requests to Excel (.xlsx) or PDF formats
+- **User Management** (Admin only):
+  - Add new staff users
+  - Edit user roles (admin/staff)
+  - Reset user passwords
+  - Delete users
+  - View user creation and modification dates
+- **Password Management**: Change your own password securely
+- **Duplicate Detection**: Warns when similar requests already exist
 
 ## 🏗️ Tech Stack
 
@@ -137,10 +148,13 @@ allelectronic/
 │   ├── health.js           # Health check endpoint
 │   ├── repair-request.js   # Submit repair requests
 │   ├── admin/
-│   │   ├── login.js        # Admin authentication
-│   │   ├── requests.js     # List all requests (paginated)
-│   │   ├── repair-request.js # Get single request
-│   │   └── update-status.js  # Update request status
+│   │   ├── login.js            # Admin authentication
+│   │   ├── requests.js         # List all requests (paginated)
+│   │   ├── repair-request.js   # Get single request
+│   │   ├── update-status.js    # Update request status
+│   │   ├── delete-requests.js  # Delete requests (admin only)
+│   │   ├── change-password.js  # Change own password
+│   │   └── user-management.js  # User CRUD operations (admin only)
 │   └── middleware/
 │       └── auth.js         # JWT authentication middleware
 │
@@ -164,21 +178,32 @@ allelectronic/
 | `POST` | `/api/admin/requests` | Get all requests (paginated) | Yes |
 | `POST` | `/api/admin/repair-request` | Get single request details | Yes |
 | `POST` | `/api/admin/update-status` | Update request status/payment | Yes |
+| `DELETE` | `/api/admin/delete-requests` | Delete selected requests | Admin |
+| `POST` | `/api/admin/change-password` | Change own password | Yes |
+| `GET` | `/api/admin/user-management` | List all users | Admin |
+| `POST` | `/api/admin/user-management` | Create new user | Admin |
+| `PUT` | `/api/admin/user-management` | Update user role/password | Admin |
+| `DELETE` | `/api/admin/user-management` | Delete user | Admin |
 
 ## 🗄️ Database Schema
 
-### Admin Users Collection (`adminusers`)
+### Admin Users Collection (`adminusers` or `admin_users`)
 ```javascript
 {
   username: String (unique),
-  password: String,
-  email: String (unique),
-  role: String (enum: ['admin', 'moderator']),
-  isActive: Boolean,
+  password: String (bcrypt hashed),
+  role: String (enum: ['admin', 'user']),
   createdAt: Date,
-  updatedAt: Date
+  createdBy: String,
+  lastModified: Date,
+  modifiedBy: String,
+  lastPasswordChange: Date
 }
 ```
+
+**Roles:**
+- `admin`: Full access (view, edit, delete, export, user management)
+- `user`: Staff access (view, edit, export only - no delete or user management)
 
 ### Repair Requests Collection (`repairrequests`)
 ```javascript
@@ -217,11 +242,15 @@ node scripts/check-collections.js
 ## 🔒 Security
 
 - ✅ JWT-based authentication with 8-hour token expiration
-- ✅ Password stored in database (not environment variables)
+- ✅ Role-based access control (Admin vs Staff users)
+- ✅ Passwords hashed with bcrypt (10 rounds)
+- ✅ Client-side role verification with periodic integrity checks
 - ✅ CORS enabled for cross-origin requests
 - ✅ Input validation on both client and server
 - ✅ Environment variables for sensitive data
 - ✅ MongoDB connection string with secure credentials
+- ✅ Cannot delete your own admin account
+- ✅ Password requirements enforced (minimum 4 characters)
 
 ## 📝 Admin Access
 
@@ -230,6 +259,26 @@ node scripts/check-collections.js
 - Password: `Passw0rd`
 
 ⚠️ **Change the password after first login for production use!**
+
+### User Roles & Permissions
+
+**Admin Role:**
+- ✅ View all repair requests
+- ✅ Edit repair requests (status, payment)
+- ✅ Delete repair requests
+- ✅ Export to Excel/PDF
+- ✅ Manual entry (phone orders)
+- ✅ User management (add/edit/delete users)
+- ✅ Change own password
+
+**Staff Role (User):**
+- ✅ View all repair requests
+- ✅ Edit repair requests (status, payment)
+- ✅ Export to Excel/PDF
+- ✅ Manual entry (phone orders)
+- ✅ Change own password
+- ❌ No delete permissions
+- ❌ No user management access
 
 ## 🤝 Contributing
 

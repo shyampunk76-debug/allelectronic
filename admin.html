@@ -24,11 +24,24 @@
     <section id="adminArea" class="hidden">
       <div class="admin-header">
         <div>
-          <h2>Repair Requests</h2>
+          <h2>Admin Console</h2>
           <div id="userRoleInfo" style="font-size: 14px; color: #6b7280; margin-top: 4px;"></div>
         </div>
-        <button id="btnLogout" class="logout-btn">🔓 Logout</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button id="btnUserManagement" class="btn-user-mgmt hidden" title="User Management">👥 Users</button>
+          <button id="btnChangePassword" class="btn-password" title="Change Password">🔑 Change Password</button>
+          <button id="btnLogout" class="logout-btn">🔓 Logout</button>
+        </div>
       </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-navigation">
+        <button class="tab-btn active" data-tab="requests">📋 Repair Requests</button>
+        <button class="tab-btn" id="tabUserManagement" data-tab="user-management" style="display: none;">👥 User Management</button>
+      </div>
+
+      <!-- Requests Tab Content -->
+      <div id="tabRequests" class="tab-content active">
 
       <!-- Manual Entry Form -->
       <div class="manual-entry-section">
@@ -141,7 +154,97 @@
           <button class="pagination-btn" id="btnNextPage">Next →</button>
         </div>
       </div>
+      </div>
+      <!-- End Requests Tab Content -->
     </section>
+
+    <!-- User Management Tab Content -->
+    <div id="tabUserManagement" class="tab-content">
+      <div class="user-management-panel">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin: 0;">👥 User Management</h3>
+          <button id="btnAddUser" class="btn" style="background: #10b981; padding: 8px 16px;">➕ Add New User</button>
+        </div>
+
+        <div id="usersTableContainer" class="table-container">
+          <table id="usersTable">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Created</th>
+                <th>Last Modified</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🔑 Change Password</h3>
+          <button class="modal-close" id="closePasswordModal">×</button>
+        </div>
+        <form id="changePasswordForm">
+          <div class="form-field">
+            <label for="currentPassword">Current Password *</label>
+            <input type="password" id="currentPassword" required autocomplete="current-password">
+          </div>
+          <div class="form-field">
+            <label for="newPassword">New Password *</label>
+            <input type="password" id="newPassword" required autocomplete="new-password" minlength="4">
+          </div>
+          <div class="form-field">
+            <label for="confirmPassword">Confirm New Password *</label>
+            <input type="password" id="confirmPassword" required autocomplete="new-password" minlength="4">
+          </div>
+          <div id="passwordMessage" style="margin-top: 10px; font-size: 0.9rem;"></div>
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn" style="background: #667eea;">Change Password</button>
+            <button type="button" class="btn" style="background: #6b7280;" id="cancelPasswordChange">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="userModalTitle">➕ Add New User</h3>
+          <button class="modal-close" id="closeUserModal">×</button>
+        </div>
+        <form id="userForm">
+          <input type="hidden" id="editUserId">
+          <div class="form-field">
+            <label for="userUsername">Username *</label>
+            <input type="text" id="userUsername" required autocomplete="off">
+          </div>
+          <div class="form-field" id="passwordField">
+            <label for="userPassword">Password *</label>
+            <input type="password" id="userPassword" required autocomplete="new-password" minlength="4">
+          </div>
+          <div class="form-field">
+            <label for="userRole">Role *</label>
+            <select id="userRole" required>
+              <option value="user">User (Staff)</option>
+              <option value="admin">Admin (Full Access)</option>
+            </select>
+          </div>
+          <div id="userMessage" style="margin-top: 10px; font-size: 0.9rem;"></div>
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="btn" style="background: #10b981;" id="btnSaveUser">Save User</button>
+            <button type="button" class="btn" style="background: #6b7280;" id="cancelUserForm">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </main>
 
   <!-- Export Libraries -->
