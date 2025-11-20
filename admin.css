@@ -25,8 +25,8 @@ textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius
 .btn:hover { background:#5568d3; }
 .btn-toggle { background:#6b7280; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
 .btn-toggle:hover { background:#4b5563; }
-.btn-delete { background:#dc2626; color:white; }
-.btn-delete:hover { background:#b91c1c; }
+.btn-delete { background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; transition:all 0.2s; }
+.btn-delete:hover { background:#dc2626; }
 .btn-export { background:#10b981; color:white; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; font-size:14px; }
 .btn-export:hover { background:#059669; }
 .hidden { display:none !important; }
