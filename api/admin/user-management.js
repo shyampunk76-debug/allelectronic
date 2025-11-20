@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
 
     // POST - Add new staff user
     if (req.method === 'POST') {
-      const { username, password, role } = req.body;
+      const { username, password, role, email } = req.body;
 
       if (!username || !password) {
         return res.status(400).json({ error: 'Username and password are required' });
@@ -83,6 +83,7 @@ module.exports = async (req, res) => {
       const newUser = new AdminUser({
         username,
         password: hashedPassword,
+        email: email || `${username}@allelectronic.local`,
         role: userRole,
         createdBy: decoded.username
       });
