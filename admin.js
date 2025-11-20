@@ -45,20 +45,12 @@ function checkAuth() {
   
   // Show/hide features based on role
   if (currentUserRole === 'admin') {
-    btnDeleteSelected.classList.remove('hidden');
+    btnDeleteSelected?.classList.remove('hidden');
   } else {
-    btnDeleteSelected.classList.add('hidden');
+    btnDeleteSelected?.classList.add('hidden');
   }
   
-  // Update UI for role (user management access)
-  updateUIForRole();
-  
   return true;
-}
-
-// Initialize on page load
-if (checkAuth()) {
-  loadRequests();
 }
 
 function showStatus(msg, isError = false) {
@@ -1435,3 +1427,14 @@ window.addEventListener('click', (e) => {
   }
 });
 
+// ========================================
+// INITIALIZE ON PAGE LOAD
+// ========================================
+
+// Check authentication and initialize
+if (checkAuth()) {
+  // Update UI for role (show/hide Manage Users button)
+  updateUIForRole();
+  // Load repair requests
+  loadRequests();
+}
