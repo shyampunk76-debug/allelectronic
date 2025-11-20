@@ -1200,8 +1200,6 @@ changePasswordForm?.addEventListener('submit', async (e) => {
 // USER MANAGEMENT
 // ========================================
 
-const btnUserManagement = document.getElementById('btnManageUsers');
-const tabUserManagement = document.getElementById('tabUserManagement');
 const usersTableBody = document.querySelector('#usersTable tbody');
 const btnAddUser = document.getElementById('btnAddUser');
 const userModal = document.getElementById('userModal');
@@ -1214,9 +1212,9 @@ const userModalTitle = document.getElementById('userModalTitle');
 // Show user management button only for admins
 function updateUIForRole() {
   if (currentUserRole === 'admin') {
-    btnUserManagement?.classList.remove('hidden');
+    btnManageUsers?.classList.remove('hidden');
   } else {
-    btnUserManagement?.classList.add('hidden');
+    btnManageUsers?.classList.add('hidden');
   }
 }
 
