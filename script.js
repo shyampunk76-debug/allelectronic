@@ -12,6 +12,37 @@ console.log('🔧 API Configuration:', {
 });
 
 // ========================================
+// SCROLL REVEAL ANIMATIONS
+// ========================================
+
+function initScrollReveal() {
+    const revealElements = document.querySelectorAll('.scroll-reveal-item');
+    
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15 // Trigger when 15% of element is visible
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                // Unobserve after revealing to improve performance
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    revealElements.forEach(element => {
+        observer.observe(element);
+    });
+}
+
+// Initialize scroll reveal when page loads
+document.addEventListener('DOMContentLoaded', initScrollReveal);
+
+// ========================================
 // MODAL DIALOG SYSTEM
 // ========================================
 
