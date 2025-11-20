@@ -85,10 +85,10 @@ textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius
   width:100%; 
   border-collapse:collapse; 
   table-layout:fixed; 
-  min-width:1400px; 
+  min-width:1100px; 
 }
 #requestsTable th, #requestsTable td { 
-  padding:12px 10px; 
+  padding:10px 8px; 
   border-bottom:1px solid #e5e7eb; 
   text-align:left; 
   vertical-align:middle; 
@@ -103,34 +103,36 @@ textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius
   top:0;
   z-index:10;
   border-bottom:2px solid #d1d5db;
+  font-size:13px;
 }
 #requestsTable td { 
   word-wrap:break-word; 
   background:white;
+  font-size:13px;
 }
 #requestsTable tbody tr:hover { 
   background:#f9fafb; 
 }
 
-/* Column widths - Better proportions */
-#requestsTable th:nth-child(1), #requestsTable td:nth-child(1) { width:45px; text-align:center; padding:8px; } /* Checkbox */
-#requestsTable th:nth-child(2), #requestsTable td:nth-child(2) { width:50px; text-align:center; font-weight:600; color:#6b7280; } /* Serial */
-#requestsTable th:nth-child(3), #requestsTable td:nth-child(3) { width:100px; font-size:0.85rem; } /* ID */
-#requestsTable th:nth-child(4), #requestsTable td:nth-child(4) { width:130px; font-weight:500; } /* Name */
-#requestsTable th:nth-child(5), #requestsTable td:nth-child(5) { width:180px; font-size:0.9rem; } /* Email */
-#requestsTable th:nth-child(6), #requestsTable td:nth-child(6) { width:120px; font-size:0.9rem; } /* Phone */
-#requestsTable th:nth-child(7), #requestsTable td:nth-child(7) { width:130px; } /* Product */
-#requestsTable th:nth-child(8), #requestsTable td:nth-child(8) { width:220px; } /* Issue */
-#requestsTable th:nth-child(9), #requestsTable td:nth-child(9) { width:140px; } /* Status */
-#requestsTable th:nth-child(10), #requestsTable td:nth-child(10) { width:150px; } /* Payment */
-#requestsTable th:nth-child(11), #requestsTable td:nth-child(11) { width:100px; text-align:center; } /* Actions */
+/* Column widths - Compact proportions to fit in viewport */
+#requestsTable th:nth-child(1), #requestsTable td:nth-child(1) { width:35px; text-align:center; padding:6px; } /* Checkbox */
+#requestsTable th:nth-child(2), #requestsTable td:nth-child(2) { width:40px; text-align:center; font-weight:600; color:#6b7280; } /* Serial */
+#requestsTable th:nth-child(3), #requestsTable td:nth-child(3) { width:90px; font-size:0.8rem; } /* ID */
+#requestsTable th:nth-child(4), #requestsTable td:nth-child(4) { width:100px; font-weight:500; } /* Name */
+#requestsTable th:nth-child(5), #requestsTable td:nth-child(5) { width:140px; font-size:0.85rem; } /* Email */
+#requestsTable th:nth-child(6), #requestsTable td:nth-child(6) { width:95px; font-size:0.85rem; } /* Phone */
+#requestsTable th:nth-child(7), #requestsTable td:nth-child(7) { width:100px; } /* Product */
+#requestsTable th:nth-child(8), #requestsTable td:nth-child(8) { width:150px; } /* Issue */
+#requestsTable th:nth-child(9), #requestsTable td:nth-child(9) { width:115px; } /* Status */
+#requestsTable th:nth-child(10), #requestsTable td:nth-child(10) { width:125px; } /* Payment */
+#requestsTable th:nth-child(11), #requestsTable td:nth-child(11) { width:90px; text-align:center; } /* Actions */
 
 /* Issue column - handle long text */
 #requestsTable td:nth-child(8) { 
   overflow:hidden; 
   text-overflow:ellipsis; 
   white-space:nowrap; 
-  max-width:220px;
+  max-width:150px;
   position:relative;
   cursor:help;
 }
@@ -154,13 +156,13 @@ textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius
 .email-cell, .phone-cell { font-size:0.9rem; word-break:break-word; }
 .status { margin:12px 0; color:#374151 }
 .actionBtn { 
-  padding:8px 12px; 
+  padding:7px 10px; 
   border-radius:6px; 
   border:1px solid #e5e7eb; 
   cursor:pointer; 
   background:#667eea; 
   color:white;
-  font-size:13px; 
+  font-size:12px; 
   white-space:nowrap; 
   font-weight:500;
   transition:all 0.2s;
@@ -171,10 +173,10 @@ textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius
   box-shadow:0 2px 4px rgba(102,126,234,0.3);
 }
 .select { 
-  padding:8px 10px; 
+  padding:6px 8px; 
   border:1px solid #e5e7eb; 
   border-radius:6px; 
-  font-size:13px; 
+  font-size:12px; 
   width:100%; 
   background:white;
   cursor:pointer;
